@@ -3002,6 +3002,14 @@ final class GeneralUtilityTest extends UnitTestCase
                 '/somewhere/fileadmin/foo.txt',
                 '',
             ],
+            'absolute paths only sharing the public path prefix are returned empty' => [
+                Environment::getPublicPath() . '-sibling/foo.txt',
+                '',
+            ],
+            'absolute paths only sharing the project path prefix are returned empty' => [
+                Environment::getProjectPath() . '-sibling/foo.txt',
+                '',
+            ],
             'EXT paths are resolved to absolute paths' => [
                 'EXT:foo/Resources/Private/Templates/Home.html',
                 '/path/to/foo/Resources/Private/Templates/Home.html',
