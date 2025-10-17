@@ -176,7 +176,7 @@ getPhpImageVersion() {
             echo -n "1.8"
             ;;
         8.5)
-            echo -n "1.0"
+            echo -n "1.8"
             ;;
     esac
 }

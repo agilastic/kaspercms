@@ -218,7 +218,8 @@ final class ResourceCompressorTest extends UnitTestCase
         $subject->method('getFilenameFromMainDir')->willReturnArgument(0);
         $subject->expects(self::once())
             ->method('createMergedCssFile')
-            ->with(self::equalTo([$screen3FileName, $screen1FileName, $screen2FileName]));
+            ->with(self::equalTo([$screen3FileName, $screen1FileName, $screen2FileName]))
+            ->willReturn('fake.css');
 
         $subject->concatenateCssFiles($testFileFixture);
     }
