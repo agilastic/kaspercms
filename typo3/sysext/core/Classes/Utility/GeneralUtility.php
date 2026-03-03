@@ -1140,7 +1140,7 @@ class GeneralUtility
         if ($xhtmlSafe) {
             $newArr = [];
             foreach ($arr as $attributeName => $attributeValue) {
-                $attributeName = strtolower($attributeName);
+                $attributeName = strtolower((string)$attributeName);
                 if (!isset($newArr[$attributeName])) {
                     $newArr[$attributeName] = htmlspecialchars((string)$attributeValue);
                 }
