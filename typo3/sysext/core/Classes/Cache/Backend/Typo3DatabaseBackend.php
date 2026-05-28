@@ -20,6 +20,7 @@ use TYPO3\CMS\Core\Cache\Exception\InvalidDataException;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Platform\PlatformInformation;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -356,10 +357,7 @@ class Typo3DatabaseBackend extends AbstractBackend implements TaggableBackendInt
         $cacheEntryIdentifiers = $result->fetchFirstColumn();
         if (!empty($cacheEntryIdentifiers)) {
             // Delete tag rows connected to expired cache entries
-            $quotedIdentifiers = $queryBuilder->createNamedParameter($cacheEntryIdentifiers, Connection::PARAM_STR_ARRAY);
-            $queryBuilder->delete($this->tagsTable)
-                ->where($queryBuilder->expr()->in('identifier', $quotedIdentifiers))
-                ->executeStatement();
+            $this->deleteTagsChunked($cacheEntryIdentifiers);
         }
         $queryBuilder->delete($this->cacheTable)
             ->where($queryBuilder->expr()->lt(
@@ -384,10 +382,22 @@ class Typo3DatabaseBackend extends AbstractBackend implements TaggableBackendInt
         $tagsEntryIdentifiers = $result->fetchFirstColumn();
 
         if (!empty($tagsEntryIdentifiers)) {
+            $this->deleteTagsChunked($tagsEntryIdentifiers);
+        }
+    }
+
+    /**
+     * @param string[] $items
+     */
+    protected function deleteTagsChunked(array $items): void
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->tagsTable);
+        $maxBindParameters = PlatformInformation::getMaxBindParameters($connection->getDatabasePlatform());
+        foreach (array_chunk($items, $maxBindParameters, true) as $itemsChunk) {
             $queryBuilder = $connection->createQueryBuilder();
-            $quotedIdentifiers = $queryBuilder->createNamedParameter($tagsEntryIdentifiers, Connection::PARAM_STR_ARRAY);
-            $queryBuilder->delete($this->tagsTable)
-                ->where($queryBuilder->expr()->in('identifier', $quotedIdentifiers))
+            $queryBuilder
+                ->delete($this->tagsTable)
+                ->where($queryBuilder->expr()->in('identifier', $queryBuilder->quoteArrayBasedValueListToStringList($itemsChunk)))
                 ->executeStatement();
         }
     }
