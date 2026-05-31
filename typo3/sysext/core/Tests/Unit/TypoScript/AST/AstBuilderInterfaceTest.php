@@ -1386,7 +1386,7 @@ final class AstBuilderInterfaceTest extends UnitTestCase
         $noopEventDispatcher = new NoopEventDispatcher();
         $tokens = (new LosslessTokenizer())->tokenize($source);
         $ast = (new AstBuilder($noopEventDispatcher))->build($tokens, new RootNode());
-        self::assertEquals($expectedAst, unserialize(serialize($ast)));
+        self::assertRootNodeIsSerializable($expectedAst, $ast);
     }
 
     #[DataProvider('buildDataProvider')]
@@ -1601,7 +1601,7 @@ final class AstBuilderInterfaceTest extends UnitTestCase
         $noopEventDispatcher = new NoopEventDispatcher();
         $tokens = (new LosslessTokenizer())->tokenize($source);
         $ast = (new AstBuilder($noopEventDispatcher))->build($tokens, new RootNode());
-        self::assertEquals($expectedAst, unserialize(serialize($ast)));
+        self::assertRootNodeIsSerializable($expectedAst, $ast);
     }
 
     #[DataProvider('buildWithPreviousValueDataProvider')]
@@ -1936,7 +1936,7 @@ final class AstBuilderInterfaceTest extends UnitTestCase
         $noopEventDispatcher = new NoopEventDispatcher();
         $tokens = (new LosslessTokenizer())->tokenize($source);
         $ast = (new AstBuilder($noopEventDispatcher))->build($tokens, new RootNode());
-        self::assertEquals($expectedAst, unserialize(serialize($ast)));
+        self::assertRootNodeIsSerializable($expectedAst, $ast);
     }
 
     #[DataProvider('buildReferenceDataProvider')]
@@ -2248,7 +2248,7 @@ final class AstBuilderInterfaceTest extends UnitTestCase
         $noopEventDispatcher = new NoopEventDispatcher();
         $tokens = (new LosslessTokenizer())->tokenize($source);
         $ast = (new AstBuilder($noopEventDispatcher))->build($tokens, new RootNode(), $constants);
-        self::assertEquals($expectedAst, unserialize(serialize($ast)));
+        self::assertRootNodeIsSerializable($expectedAst, $ast);
     }
 
     #[DataProvider('buildConstantDataProvider')]
@@ -2967,5 +2967,14 @@ final class AstBuilderInterfaceTest extends UnitTestCase
         $tokens = (new LosslessTokenizer())->tokenize($source);
         $ast = (new CommentAwareAstBuilder(new NoopEventDispatcher()))->build($tokens, new RootNode());
         self::assertEquals($expectedAst, $ast);
+    }
+
+    /**
+     * The TYPO3 caching framework serializes cached objects.
+     * A successful serialize/unserialize round-trip proves the AST is cacheable.
+     */
+    private static function assertRootNodeIsSerializable(RootNode $expectedAst, RootNode $ast): void
+    {
+        self::assertEquals($expectedAst, unserialize(serialize($ast), ['allowed_classes' => true]));
     }
 }
