@@ -5771,6 +5771,12 @@ class DataHandler implements LoggerAwareInterface
         $deleteField = (string)($GLOBALS['TCA'][$table]['ctrl']['delete'] ?? '');
         $timestampField = (string)($GLOBALS['TCA'][$table]['ctrl']['tstamp'] ?? '');
 
+        // Exit if the current user does not have permission to modify the table
+        if (!$this->checkModifyAccessList($table)) {
+            $this->log($table, 0, SystemLogDatabaseAction::DELETE, 0, SystemLogErrorClassification::USER_ERROR, 'Cannot restore "{table}:{uid}" without permission', 0, ['table' => $table, 'uid' => $uid]);
+            return;
+        }
+
         if ($record === null
             || $deleteField === ''
             || !isset($record[$deleteField])
@@ -5793,7 +5799,7 @@ class DataHandler implements LoggerAwareInterface
         $recordPid = (int)($record['pid'] ?? 0);
         if ($recordPid > 0) {
             // Record is not on root level. Parent page record must exist and must not be deleted itself.
-            $page = BackendUtility::getRecord('pages', $recordPid, 'deleted', '', false);
+            $page = BackendUtility::getRecord('pages', $recordPid, '*', '', false);
             if ($page === null || !isset($page['deleted']) || (bool)$page['deleted'] === true) {
                 $this->log(
                     $table,
@@ -5802,6 +5808,25 @@ class DataHandler implements LoggerAwareInterface
                     0,
                     SystemLogErrorClassification::USER_ERROR,
                     'Record "{table}:{uid}" can\'t be restored: The page "{pid}" containing it does not exist or is soft-deleted',
+                    0,
+                    [
+                        'table' => $table,
+                        'uid' => $uid,
+                        'pid' => $recordPid,
+                    ],
+                    $recordPid
+                );
+                return;
+            }
+
+            if (!$this->checkRecordInsertAccess($table, $recordPid, SystemLogDatabaseAction::DELETE)) {
+                $this->log(
+                    'pages',
+                    $recordPid,
+                    SystemLogDatabaseAction::DELETE,
+                    0,
+                    SystemLogErrorClassification::USER_ERROR,
+                    'Record "{table}:{uid}" can\'t be restored: Insufficient user permissions to target page {pid}',
                     0,
                     [
                         'table' => $table,
