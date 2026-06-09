@@ -203,6 +203,7 @@ final class InstallUtilityTest extends UnitTestCase
         file_put_contents($absPath . 'Initialisation/' . $fileName, 'DUMMY');
         $registryMock = $this->getMockBuilder(Registry::class)
             ->onlyMethods(['get', 'set'])
+            ->disableOriginalConstructor()
             ->getMock();
         $registryMock
             ->method('get')

@@ -25,6 +25,7 @@ use TYPO3\CMS\Core\Adapter\EventDispatcherAdapter as SymfonyEventDispatcher;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\Loader\PageTsConfigLoader;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\DependencyInjection\ContainerBuilder;
 use TYPO3\CMS\Core\Imaging\IconRegistry;
 use TYPO3\CMS\Core\Package\AbstractServiceProvider;
@@ -64,6 +65,7 @@ class ServiceProvider extends AbstractServiceProvider
             Console\CommandRegistry::class => self::getConsoleCommandRegistry(...),
             Context\Context::class => self::getContext(...),
             Core\BootService::class => self::getBootService(...),
+            Crypto\HashService::class => self::getHashService(...),
             Crypto\PasswordHashing\PasswordHashFactory::class => self::getPasswordHashFactory(...),
             EventDispatcher\EventDispatcher::class => self::getEventDispatcher(...),
             EventDispatcher\ListenerProvider::class => self::getEventListenerProvider(...),
@@ -425,9 +427,23 @@ class ServiceProvider extends AbstractServiceProvider
         return new Package\Cache\PackageDependentCacheIdentifier($container->get(Package\PackageManager::class));
     }
 
+    public static function getHashService(): HashService
+    {
+        return new HashService();
+    }
+
     public static function getRegistry(ContainerInterface $container): Registry
     {
-        return self::new($container, Registry::class);
+        $denyListDeserializer = $container->has(Serializer\DenyListDeserializer::class)
+            ? $container->get(Serializer\DenyListDeserializer::class)
+            : new Serializer\DenyListDeserializer(
+                $container->get('cache.core'),
+                $container->get(HashService::class),
+                new Serializer\DeserializationService(),
+            );
+        return self::new($container, Registry::class, [
+            $denyListDeserializer,
+        ]);
     }
 
     public static function getFileIndexRepository(ContainerInterface $container): Resource\Index\FileIndexRepository

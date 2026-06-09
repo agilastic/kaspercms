@@ -24,7 +24,7 @@ use TYPO3\CMS\Core\Serializer\Exception\DeserializerException;
  *
  * @internal Only to be used by TYPO3 core
  */
-final readonly class DeserializationService
+final class DeserializationService
 {
     /**
      * Extracts all class names from a PHP-serialized payload, ignoring any

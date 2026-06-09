@@ -167,6 +167,9 @@ class SetupService
         $this->configurationManager->createLocalConfigurationFromFactoryConfiguration();
         $randomKey = GeneralUtility::makeInstance(Random::class)->generateRandomHexString(96);
         $this->configurationManager->setLocalConfigurationValueByPath('SYS/encryptionKey', $randomKey);
+        // ensure there is an encryption key for the current process (see https://forge.typo3.org/issues/109789)
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = $randomKey;
+
         $extensionConfiguration = new ExtensionConfiguration();
         $extensionConfiguration->synchronizeExtConfTemplateWithLocalConfigurationOfAllExtensions();
 

@@ -323,7 +323,8 @@ class ServiceProvider extends AbstractServiceProvider
             $container->get(PackageManager::class),
             $container->get(Service\LateBootService::class),
             $container->get(Service\DatabaseUpgradeWizardsService::class),
-            $container->get(FormProtectionFactory::class)
+            $container->get(FormProtectionFactory::class),
+            $container->get(Registry::class)
         );
     }
 

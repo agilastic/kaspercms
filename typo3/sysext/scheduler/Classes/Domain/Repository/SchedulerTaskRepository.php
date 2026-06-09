@@ -330,7 +330,8 @@ class SchedulerTaskRepository
             $taskData['lastExecutionFailure'] = false;
             if (!empty($row['lastexecution_failure'])) {
                 $taskData['lastExecutionFailure'] = true;
-                $exceptionArray = @unserialize($row['lastexecution_failure']);
+                // only scalars are serialized in \TYPO3\CMS\Scheduler\Scheduler::executeTask
+                $exceptionArray = @unserialize($row['lastexecution_failure'], ['allowed_classes' => false]);
                 $taskData['lastExecutionFailureCode'] = '';
                 $taskData['lastExecutionFailureMessage'] = '';
                 if (is_array($exceptionArray)) {
@@ -458,7 +459,8 @@ class SchedulerTaskRepository
 
         $runningExecutions = [];
         if ($row && !empty($row['serialized_executions'])) {
-            $runningExecutions = unserialize($row['serialized_executions']);
+            // serialized in \TYPO3\CMS\Scheduler\Domain\Repository\SchedulerTaskRepository::addExecutionToTask as `array<int, int>`
+            $runningExecutions = unserialize($row['serialized_executions'], ['allowed_classes' => false]);
         }
         // Count the number of existing executions and use that number as a key
         // (we need to know that number, because it is returned at the end of the method)
@@ -494,7 +496,8 @@ class SchedulerTaskRepository
     {
         $row = $this->findRecordByUid($task->getTaskUid());
         if ($row && $row['serialized_executions'] !== '') {
-            $runningExecutions = unserialize($row['serialized_executions']);
+            // serialized in \TYPO3\CMS\Scheduler\Domain\Repository\SchedulerTaskRepository::addExecutionToTask as `array<int, int>`
+            $runningExecutions = unserialize($row['serialized_executions'], ['allowed_classes' => false]);
             // Remove the selected execution
             unset($runningExecutions[$executionID]);
             if (!empty($runningExecutions)) {

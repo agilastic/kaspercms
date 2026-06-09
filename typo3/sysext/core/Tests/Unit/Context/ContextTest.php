@@ -83,7 +83,7 @@ final class ContextTest extends UnitTestCase
     {
         $subject = new Context([
             'coolio' => new UserAspect(),
-            'uncoolio' => new Registry(),
+            'uncoolio' => $this->createMock(Registry::class),
         ]);
         self::assertTrue($subject->hasAspect('coolio'));
         self::assertFalse($subject->hasAspect('uncoolio'));
