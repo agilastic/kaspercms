@@ -23,6 +23,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\Filter\FileExtensionFilter;
 use TYPO3\CMS\Core\Resource\Folder;
@@ -98,7 +99,9 @@ class FileDownloadController
         }
         $zipFile->close();
         $response = $this->createResponse($zipFileName, $filesAdded);
-        unlink($zipFileName);
+        if ($filesAdded > 0) {
+            unlink($zipFileName);
+        }
         return $response;
     }
 
@@ -127,8 +130,16 @@ class FileDownloadController
     {
         $files = [];
         foreach ($items as $itemIdentifier) {
-            $fileOrFolderObject = $this->resourceFactory->retrieveFileOrFolderObject($itemIdentifier);
+            try {
+                $fileOrFolderObject = $this->resourceFactory->retrieveFileOrFolderObject($itemIdentifier);
+            } catch (ResourceDoesNotExistException) {
+                continue;
+            }
             if ($fileOrFolderObject === null) {
+                continue;
+            }
+            // Files from fallback storage must be skipped in general
+            if ($fileOrFolderObject->getStorage()->isFallbackStorage()) {
                 continue;
             }
             $baseIdentifier = dirname($fileOrFolderObject->getIdentifier());
