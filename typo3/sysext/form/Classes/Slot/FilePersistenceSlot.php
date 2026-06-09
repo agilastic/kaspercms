@@ -284,7 +284,7 @@ final class FilePersistenceSlot implements SingletonInterface
     protected function isFormDefinition(string $identifier): bool
     {
         return str_ends_with(
-            $identifier,
+            mb_strtolower($identifier),
             FormPersistenceManager::FORM_DEFINITION_FILE_EXTENSION
         );
     }
