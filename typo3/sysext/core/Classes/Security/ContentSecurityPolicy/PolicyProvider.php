@@ -133,7 +133,7 @@ final class PolicyProvider
                 ->withScheme($current->getScheme())
                 ->withHost($current->getHost())
                 ->withPort($current->getPort());
-        } elseif (!$absolute && $uri->getScheme() !== '' && $uri->getHost() !== '') {
+        } elseif (!$absolute && ($uri->getScheme() !== '' || $uri->getHost() !== '')) {
             $uri = $uri->withScheme('')->withHost('')->withPort(null);
         }
         // `/en/@http-reporting?csp=report` (relative)
