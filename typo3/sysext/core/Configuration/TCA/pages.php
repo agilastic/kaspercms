@@ -512,6 +512,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
+                'eval' => 'trim,is_in',
+                'is_in' => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_%-&,',
             ],
         ],
         'no_search' => [
