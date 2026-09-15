@@ -76,7 +76,7 @@ abstract class AbstractTypolinkBuilder
         } else {
             $forceAbsoluteUrl = !empty($configuration['forceAbsoluteUrl']);
         }
-        if (!empty($url) && $forceAbsoluteUrl && preg_match('#^(?:([a-z]+)(://)([^/]*)/?)?(.*)$#', $url, $matches)) {
+        if (!empty($url) && $forceAbsoluteUrl && preg_match('#^(?:([a-z]+):)?(?:(//)([^/]*))?(.*)$#', $url, $matches)) {
             $urlParts = [
                 'scheme' => $matches[1],
                 'delimiter' => '://',
@@ -115,6 +115,7 @@ abstract class AbstractTypolinkBuilder
             }
             // Recreate the absolute URL:
             if ($isUrlModified) {
+                $urlParts['delimiter'] = $urlParts['scheme'] !== '' ? '://' : '//';
                 $url = implode('', $urlParts);
             }
         }
