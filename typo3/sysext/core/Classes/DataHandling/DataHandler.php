@@ -736,9 +736,11 @@ class DataHandler implements LoggerAwareInterface
     {
         // First set TCAdefaults respecting the given PageID
         $tcaDefaults = BackendUtility::getPagesTSconfig($pageId)['TCAdefaults.'] ?? null;
-        // Re-apply $this->defaultValues settings
+        // Page TSconfig defaults are only valid for this record, restore the previous defaults afterwards
+        $defaultValues = $this->defaultValues;
         $this->setDefaultsFromUserTS($tcaDefaults);
         $cleanFieldArray = $this->newFieldArray($table);
+        $this->defaultValues = $defaultValues;
         if (isset($prepopulatedFieldArray['pid'])) {
             $cleanFieldArray['pid'] = $prepopulatedFieldArray['pid'];
         }
