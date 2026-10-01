@@ -114,7 +114,7 @@ final class PolicyProvider
         // resolve URI from current site language or site default language in frontend scope
         if ($scope->isFrontendSite()) {
             $site = $this->resolveSite($scope);
-            $siteLanguage = $request->getAttribute('siteLanguage');
+            $siteLanguage = $request->getAttribute('language');
             $siteLanguage = $siteLanguage instanceof SiteLanguage ? $siteLanguage : $site->getDefaultLanguage();
             $uri = $siteLanguage->getBase();
             $uri = $uri->withPath(rtrim($uri->getPath(), '/') . '/');
