@@ -2,8 +2,8 @@ name: ULTS security check
 
 on:
   schedule:
-    # every day, 06:00 UTC
-    - cron: '0 6 * * *'
+    # every day, 04:00 UTC (06:00 CEST)
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
