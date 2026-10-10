@@ -59,7 +59,7 @@
 		"firebase/php-jwt": "^6.10.2 || ^7.0.2",
 		"guzzlehttp/guzzle": "^7.15.2",
 		"guzzlehttp/promises": "^1.5.2 || ^2.0",
-		"guzzlehttp/psr7": "^2.10.2",
+		"guzzlehttp/psr7": "^2.12.3",
 		"lolli42/finediff": "^1.0.2",
 		"masterminds/html5": "^2.10.0",
 		"nikic/php-parser": "^4.15.4",
