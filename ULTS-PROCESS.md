@@ -189,6 +189,31 @@ git log 31f881a2129..12.4-ults --format='%h %s' --grep='CVE-2026-47347'
 
 Every `MISSING` entry must map to an advisory that does not affect 12.4.
 
+### Automated check
+
+`Build/Scripts/ultsSecurityCheck.php` automates most of this step and prints
+a Markdown report:
+
+- GitHub security advisories of TYPO3 and html-sanitizer that affect the
+  base version 12.4.45,
+- upstream `[SECURITY]` commits on `13.4`, `14.3` and `main` without a
+  counterpart on the current branch,
+- `composer audit` (production and `require-dev` separately) and
+  `npm audit` for the bundled CKEditor packages.
+
+An item counts as handled as soon as its CVE or GHSA identifier is documented
+in this file, in a coverage matrix or in a "not affected" table.
+
+```bash
+php Build/Scripts/ultsSecurityCheck.php --fetch               # needs gh, git remote "upstream"
+php Build/Scripts/ultsSecurityCheck.php --fetch --with-tests  # plus unit tests, PHPStan, CGL
+```
+
+Exit code `0` means no open items, `1` open items, `2` a check could not be
+completed. The workflow `.github/workflows/ults-security-check.yml` runs the
+check every Monday and creates or updates an issue labelled `ults-check`
+when open items are found. Triage (step 2) and backports stay manual.
+
 ## 8. Release
 
 <a id="versioning"></a>
