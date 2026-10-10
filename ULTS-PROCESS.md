@@ -158,6 +158,15 @@ done
 
 Tests run against PHP 8.1, the minimum PHP version of TYPO3 12.4.
 
+On GitHub, `.github/workflows/ci.yml` runs CGL, PHPStan, the exception code
+check, unit tests (PHP 8.1 and 8.5) and the functional tests (SQLite, four
+chunks) for every push and pull request on `12.4-ults`.
+
+`.github/workflows/dependency-updates.yml` runs `composer update --patch-only`
+on the first day of every month and opens a pull request when locked
+dependencies changed. It starts the CI workflow for that branch. Pull requests
+are reviewed and merged manually; minor and major updates are not automated.
+
 ## 7. Three-way coverage check
 
 Before every release, compare all three sources. A release is only made when

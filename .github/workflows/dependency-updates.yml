@@ -1,0 +1,92 @@
+name: Dependency patch updates
+
+on:
+  schedule:
+    # first day of every month, 04:00 UTC
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+env:
+  CI: 'true'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+
+      - name: Update locked dependencies to their latest patch versions
+        run: Build/Scripts/runTests.sh -b docker -p 8.1 -s composer -- update --patch-only --no-progress
+
+      - name: Summarize changes
+        id: changes
+        run: |
+          php -r '
+            $old = json_decode((string)shell_exec("git show HEAD:composer.lock"), true);
+            $new = json_decode((string)file_get_contents("composer.lock"), true);
+            $versions = static function (array $lock): array {
+                $result = [];
+                foreach (array_merge($lock["packages"] ?? [], $lock["packages-dev"] ?? []) as $package) {
+                    $result[$package["name"]] = $package["version"];
+                }
+                return $result;
+            };
+            $before = $versions($old);
+            $lines = [];
+            foreach ($versions($new) as $name => $version) {
+                if (($before[$name] ?? null) !== $version) {
+                    $lines[] = sprintf("- %s: %s -> %s", $name, $before[$name] ?? "new", $version);
+                }
+            }
+            file_put_contents("changes.md", implode("\n", $lines) . "\n");
+            echo count($lines);
+          ' > count.txt
+          echo "count=$(cat count.txt)" >> "$GITHUB_OUTPUT"
+          cat changes.md
+
+      - name: Create or update pull request
+        if: steps.changes.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="deps/patch-updates-$(date -u +%Y-%m)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add composer.lock
+          {
+            echo "[TASK] Update dependencies to their latest patch versions"
+            echo
+            echo "Executed commands:"
+            echo
+            echo "  composer update --patch-only"
+            echo
+            cat changes.md
+            echo
+            echo "Releases: 12.4"
+          } > commit-message.txt
+          git commit -q -F commit-message.txt
+          git push --force origin "$branch"
+          {
+            echo "Monthly update of locked dependencies to their latest **patch** versions"
+            echo "(\`composer update --patch-only\`, composer.json constraints unchanged)."
+            echo
+            cat changes.md
+            echo
+            echo "The CI workflow is started for this branch, see the checks below."
+            echo "Review and merge manually."
+          } > pr-body.md
+          if ! gh pr view "$branch" > /dev/null 2>&1; then
+            gh pr create --base 12.4-ults --head "$branch" \
+              --title "Update dependencies to their latest patch versions ($(date -u +%Y-%m))" \
+              --body-file pr-body.md
+          fi
+          gh workflow run ci.yml --ref "$branch"
