@@ -1,21 +1,31 @@
-Contributing
-------------
+# Contributing to KasperCMS
 
-TYPO3 CMS core is a volunteer effort. We encourage you to join the project by submitting changes.
+KasperCMS is a community effort. Contributions are welcome: backports of
+security fixes, tests, reviews of the coverage matrix and documentation.
 
-Have a look at our [detailed contribution walkthrough][1].
+## How to contribute
 
-If you like to contribute code, please use the [main git repository][2], all changes are
- processed in our [review system][3]. The [GitHub repository][4] is a synchronized
- mirror of the primary git repository, pull requests via GitHub will be moved to our review system automatically.
+1. Fork [agilastic/kaspercms](https://github.com/agilastic/kaspercms) and
+   create a branch from `12.4-ults`.
+2. Follow the process in [ULTS-PROCESS.md](ULTS-PROCESS.md):
+   - every fix needs a public upstream source (TYPO3 branch, advisory or
+     library release) or a test that reproduces the issue,
+   - backports are cherry-picked with `git cherry-pick -x`, so their origin
+     stays traceable,
+   - the test suites must pass on PHP 8.1, the minimum PHP version of
+     TYPO3 12.4.
+3. Open a pull request against `12.4-ults`.
 
-If you like to contribute to our [documentation][5], use the "Edit me on GitHub" button
- in the top right of each manual or reference or just make a pull request in any of the repositories
- that can be found in the TYPO3 [documentation team GitHub organisation][6].
+KasperCMS only accepts security fixes, fixes for regressions caused by them
+and security updates of dependencies. New features and breaking changes are
+out of scope.
 
-[1]: https://docs.typo3.org/core-contribution
-[2]: https://git.typo3.org/typo3/typo3
-[3]: https://review.typo3.org/q/project:Packages/TYPO3.CMS
-[4]: https://github.com/typo3/typo3
-[5]: https://docs.typo3.org
-[6]: https://github.com/TYPO3-Documentation
+## Security issues
+
+Do not open public issues or pull requests for undisclosed vulnerabilities.
+See [SECURITY.md](SECURITY.md) for how to report them.
+
+## Contributing to TYPO3 CMS
+
+Bugs and features of TYPO3 CMS itself belong upstream. See the
+[TYPO3 contribution walkthrough](https://docs.typo3.org/core-contribution).

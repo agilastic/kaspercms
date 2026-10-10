@@ -225,6 +225,24 @@ every release:
   release) cannot be cherry-picked. They are
   either ported from public upstream sources or listed as open.
 
+## Coverage matrix: 12.4.45.2
+
+KasperCMS 12.4.45.2, released 2026-10-10. Checked against OpenCVE, GitHub
+advisories and the TYPO3 git history on 2026-10-10: no new TYPO3 advisories
+affecting 12.4 were published since 12.4.45.1.
+
+This release adds fixes found during a code review of KasperCMS 12.4.45.1
+(deserialization, backend AJAX routes, redirects, path checks, SQL building
+and raw template output).
+
+| Fix on `12.4-ults` | Type | Reference |
+|---|---|---|
+| Respect table read permissions in suggest wizard | Missing authorization (CWE-862), KasperCMS finding | No CVE assigned yet. Also affects TYPO3 13.4 and 14.x. |
+| Streamline absolute path handling in `GeneralUtility::getFileAbsFileName()` | Hardening, backport of a public upstream fix that was never released for 12.4 | Forge #102995 (TYPO3 13.4) |
+
+Verification: unit tests (11722) and functional tests (7798) on PHP 8.1,
+PHPStan and CGL. Both fixes come with tests that fail without the fix.
+
 ## Coverage matrix: 12.4.45.1
 
 KasperCMS 12.4.45.1, released 2026-10-10. Checked against OpenCVE, GitHub

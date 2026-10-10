@@ -26,8 +26,8 @@ versions that have reached their official end of support.
 KasperCMS backports fixes that are publicly available: from newer TYPO3
 branches, from TYPO3 security advisories and from the upstream projects of
 bundled libraries. Fixes that are not publicly available cannot be
-included. What each release covers is documented in its
-[coverage matrix](ULTS-PROCESS.md#coverage-matrix-124451).
+included. What each release covers is documented in its coverage matrix
+in [ULTS-PROCESS.md](ULTS-PROCESS.md).
 
 ## Current Focus
 
@@ -42,10 +42,11 @@ Development happens on the `12.4-ults` branch.
 
 | KasperCMS version | Release date | Based on | Security fixes | Notes |
 |---|---|---|---|---|
-| **12.4.45.1** | 2026-10-10 | TYPO3 CMS 12.4.45 | 11 TYPO3 core CVEs, library updates | First KasperCMS release, see [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124451) |
+| **12.4.45.2** | 2026-10-10 | KasperCMS 12.4.45.1 | Suggest wizard table permissions, absolute path handling | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124452) |
+| 12.4.45.1 | 2026-10-10 | TYPO3 CMS 12.4.45 | 11 TYPO3 core CVEs, library updates | First KasperCMS release, see [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124451) |
 | 12.4.45 | 2026-04-14 | – | – | Last official community release of TYPO3 CMS 12.4 (upstream base) |
 
-The next release in development is **12.4.45.2** (`12.4.45.2-dev`).
+The next release in development is **12.4.45.3** (`12.4.45.3-dev`).
 
 ### Versioning
 
@@ -99,7 +100,7 @@ commands used and the coverage matrix of each release, is described in
 - **Vulnerabilities in TYPO3 CMS itself**, also when found in KasperCMS:
   report them to the TYPO3 Security Team at security@typo3.org, so that all
   TYPO3 users benefit. See the
-  [TYPO3 Security Team](https://typo3.org/community/teams/security/) page.
+  [TYPO3 Security Team](https://typo3.community/contribute/teams-committees/security) page.
 - **Problems caused by a KasperCMS backport**, for example a regression
   introduced by an adapted fix: report them to the KasperCMS maintainers
   through a private security advisory in this repository, not through a

@@ -2,72 +2,49 @@
 
 ## Supported Versions
 
-The following matrix shows the TYPO3 versions currently maintained by the TYPO3
-community. Sprint releases (versions before 12.4.0 and 11.5.0, in their
-corresponding branches) have reached their end of support and don't receive any
-further bug fixes or security patches.
+| Version | Supported | Notes |
+|---|---|---|
+| KasperCMS 12.4.45.x | :white_check_mark: | Security fixes via Ultra Long Term Support (ULTS) |
+| TYPO3 CMS 12.4.45 and older | :x: | Upgrade to the latest KasperCMS 12.4.45.x release |
 
-| Version  | Supported          |
-|----------|--------------------|
-| 12.4.x   | :white_check_mark: |
-| 12.3.x   | :x:                |
-| 12.2.x   | :x:                |
-| 12.1.x   | :x:                |
-| 12.0.x   | :x:                |
-| 11.5.x   | :white_check_mark: |
-| < 11.5.0 | :x:                |
+Only the latest KasperCMS release receives security fixes. See the
+[release table](README.md#releases) and the coverage matrices in
+[ULTS-PROCESS.md](ULTS-PROCESS.md).
 
 ## Reporting a Vulnerability
 
-Please report vulnerabilities to [security@typo3.org](mailto:security@typo3.org).
-Your report should include the following details:
+Please choose the right recipient:
 
-* The affected project (either the TYPO3 Core or a TYPO3 extension).
-* The exact version or version range that you analysed.
-* A step-by-step explanation of how to exploit the potential vulnerability.
+* **Vulnerabilities in TYPO3 CMS itself**, also when found in KasperCMS:
+  report them to the TYPO3 Security Team at
+  [security@typo3.org](mailto:security@typo3.org), so that all TYPO3 users
+  benefit from a fix. See the
+  [TYPO3 Security Team](https://typo3.community/contribute/teams-committees/security) page
+  for details and their GPG key.
+* **Vulnerabilities specific to KasperCMS**, for example introduced by an
+  adapted backport: report them privately through
+  [GitHub security advisories](https://github.com/agilastic/kaspercms/security/advisories/new)
+  of this repository.
 
-You can use the following GPG/PGP key ID to optionally encrypt your messages to
-[security@typo3.org](mailto:security@typo3.org):
+Your report should include:
 
-* Key ID: `C05FBE60`
-* Fingerprint: `B41C C3EF 373E 0F5C 7018  7FE9 3BEF BD27 C05F BE60`
-
-You can download the public key from the following sources:
-
-* [typo3.org](https://typo3.org/fileadmin/community/teams/security/B41CC3EF373E0F5C70187FE93BEFBD27C05FBE60.asc)
-* [keys.openpgp.org](https://keys.openpgp.org/vks/v1/by-fingerprint/B41CC3EF373E0F5C70187FE93BEFBD27C05FBE60)
+* the affected KasperCMS version or commit,
+* a description of the issue and its impact,
+* the steps needed to reproduce it.
 
 ## Coordinated Disclosure
 
 > [!CAUTION]
-> We urge security researchers not to publish vulnerabilities in issue trackers or
-> discuss them publicly (e.g. on Slack or Social Media platforms).
+> Please do not publish vulnerabilities in public issues, pull requests or
+> other public channels before a fix is available.
 
-The [TYPO3 Security Team](https://typo3.community/contribute/teams-committees/security)
-coordinates the process with the TYPO3 core developers, extension maintainers and
-other affected parties. Once a security fix is available, we prepare a new release
-and publish the fixed version. At the same time, we communicate the vulnerability
-and the fix to the public by using various communication channels such as:
-
-* [TYPO3 Security Advisories](https://typo3.org/security)
-* [TYPO3 Security Team on Mastodon](https://typo3.social/@typo3_security)
-* [TYPO3 Security Team on X](https://x.com/typo3_security)
-* [#announcements channel on Slack](https://typo3.community/meet/slack)
-* [TYPO3 Security RSS Feed](https://typo3.org/rss-security)
-* [TYPO3 Announce Mailing List](https://lists.typo3.org/cgi-bin/mailman/listinfo/typo3-announce)
-
-The TYPO3 Security Team takes care of requesting [CVE IDs](https://www.cve.org/About/Process#CVERecordLifecycle)
-(Common Vulnerabilities and Exposures identifiers).
-
-## TYPO3 Release Dates ("Patchday")
-
-We aim to publish TYPO3 maintenance releases on Tuesdays as a general rule.
-However, exceptions apply (e.g. public holidays). Release dates of
-[maintenance releases](https://typo3.com/typo3-cms/development-roadmap/maintenance-releases)
-are scheduled in advance. These releases can contain security fixes.
+Reports to the KasperCMS maintainers are acknowledged, fixed on the
+`12.4-ults` branch and released as a new `12.4.45.N` version. The fix is
+listed in the coverage matrix of that release.
 
 ## Further Information
 
-* [TYPO3 Security Team](https://typo3.community/contribute/teams-committees/security)
+* [ULTS process](ULTS-PROCESS.md): how security fixes are tracked,
+  backported, verified and released
 * [TYPO3 Security Advisories](https://typo3.org/security)
-* [TYPO3 Security Guidelines](https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/Security/Index.html)
+* [TYPO3 Security Guidelines](https://docs.typo3.org/m/typo3/reference-coreapi/12.4/en-us/Security/Index.html)
