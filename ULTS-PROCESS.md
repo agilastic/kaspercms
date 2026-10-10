@@ -211,8 +211,8 @@ php Build/Scripts/ultsSecurityCheck.php --fetch --with-tests  # plus unit tests,
 
 Exit code `0` means no open items, `1` open items, `2` a check could not be
 completed. The workflow `.github/workflows/ults-security-check.yml` runs the
-check every Monday and creates or updates an issue labelled `ults-check`
-when open items are found. Triage (step 2) and backports stay manual.
+check every day at 06:00 UTC and creates an issue labelled `ults-check` when
+open items are found, or comments on it when the findings change. Triage (step 2) and backports stay manual.
 
 ## 8. Release
 

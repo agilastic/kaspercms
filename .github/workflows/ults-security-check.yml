@@ -2,8 +2,8 @@ name: ULTS security check
 
 on:
   schedule:
-    # every Monday, 06:17 UTC
-    - cron: '17 6 * * 1'
+    # every day, 06:00 UTC
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -39,10 +39,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh label create ults-check --color B60205 \
-            --description "Findings of the weekly ULTS security check" 2>/dev/null || true
+            --description "Findings of the daily ULTS security check" 2>/dev/null || true
           number=$(gh issue list --label ults-check --state open --json number --jq '.[0].number // empty')
           if [ -n "$number" ]; then
-            gh issue comment "$number" --body-file report.md
+            # only comment when the findings changed since the last report
+            gh issue view "$number" --json body,comments \
+              --jq '(.comments | last | .body) // .body' > previous.md
+            if diff -q <(grep -v '^Date: ' previous.md) <(grep -v '^Date: ' report.md) > /dev/null; then
+              echo "Findings unchanged, issue #$number not updated."
+            else
+              gh issue comment "$number" --body-file report.md
+            fi
           else
             gh issue create --title "ULTS security check: open items" \
               --label ults-check --body-file report.md
