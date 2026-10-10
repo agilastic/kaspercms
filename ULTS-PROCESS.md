@@ -250,6 +250,18 @@ every release:
   release) cannot be cherry-picked. They are
   either ported from public upstream sources or listed as open.
 
+## Coverage matrix: 12.4.45.3 (in development)
+
+### Development dependencies
+
+`composer/composer` is a `require-dev` dependency and not part of release
+packages. It is raised from 2.9.3 to `^2.10.3` for developers and CI working
+with this repository.
+
+| Advisory | Package | Fix on `12.4-ults` |
+|---|---|---|
+| CVE-2026-40176, CVE-2026-40261, CVE-2026-45793, CVE-2026-59944, CVE-2026-59946, CVE-2026-59947, CVE-2026-59948, CVE-2026-84361 | composer/composer | Raised to `^2.10.3` |
+
 ## Coverage matrix: 12.4.45.2
 
 KasperCMS 12.4.45.2, released 2026-10-10. Checked against OpenCVE, GitHub
