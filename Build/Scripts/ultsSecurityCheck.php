@@ -31,6 +31,7 @@ if (PHP_SAPI !== 'cli') {
  * - upstream:     [SECURITY] commits on the upstream TYPO3 branches without a
  *                 counterpart on the current branch
  * - dependencies: `composer audit` and `npm audit` (CKEditor packages)
+ * - php:          security support of the PHP versions supported by TYPO3 12.4
  * - tests:        unit tests, PHPStan and CGL via runTests.sh (--with-tests)
  *
  * An item counts as handled when its CVE or GHSA identifier is documented in
@@ -46,7 +47,8 @@ if (PHP_SAPI !== 'cli') {
  *   --since=2026-04-14         ignore advisories and commits before this date
  *   --upstream-remote=upstream git remote of TYPO3/typo3
  *   --upstream-branches=13.4,14.3,main
- *   --checks=advisories,upstream,dependencies
+ *   --checks=advisories,upstream,dependencies,php
+ *   --php-versions=8.1,8.2,8.3,8.4,8.5
  *   --fetch                    fetch the upstream branches first
  *   --with-tests               additionally run unit tests, PHPStan and CGL
  */
@@ -58,7 +60,8 @@ final class UltsSecurityCheck
         'since' => '2026-04-14',
         'upstream-remote' => 'upstream',
         'upstream-branches' => '13.4,14.3,main',
-        'checks' => 'advisories,upstream,dependencies',
+        'checks' => 'advisories,upstream,dependencies,php',
+        'php-versions' => '8.1,8.2,8.3,8.4,8.5',
     ];
 
     private string $rootPath;
@@ -104,6 +107,9 @@ final class UltsSecurityCheck
         }
         if (in_array('dependencies', $checks, true)) {
             $this->checkDependencies();
+        }
+        if (in_array('php', $checks, true)) {
+            $this->checkPhpVersions();
         }
         if (isset($this->options['with-tests'])) {
             $this->runTests();
@@ -358,6 +364,48 @@ final class UltsSecurityCheck
             }
         }
         return $result;
+    }
+
+    /**
+     * Only an upcoming end of security support of the newest supported PHP
+     * version is an open item: KasperCMS then needs to support a newer one.
+     */
+    private function checkPhpVersions(): void
+    {
+        $this->section('PHP versions');
+        $data = json_decode($this->exec('curl -fsSL https://endoflife.date/api/php.json 2>/dev/null'), true);
+        if (!is_array($data)) {
+            $this->error('PHP support dates could not be fetched from endoflife.date.');
+            return;
+        }
+        $endOfLife = [];
+        foreach ($data as $cycle) {
+            $endOfLife[(string)($cycle['cycle'] ?? '')] = (string)($cycle['eol'] ?? '');
+        }
+        $today = gmdate('Y-m-d');
+        $inSixMonths = gmdate('Y-m-d', strtotime('+6 months'));
+        $inTwelveMonths = gmdate('Y-m-d', strtotime('+12 months'));
+        $versions = array_map('trim', explode(',', $this->options['php-versions']));
+        $newest = end($versions);
+        $rows = [];
+        foreach ($versions as $version) {
+            $eol = $endOfLife[$version] ?? '';
+            if ($eol === '') {
+                $status = 'unknown';
+            } elseif ($eol < $today) {
+                $status = 'end of life';
+            } elseif ($eol < $inSixMonths) {
+                $status = 'ends within 6 months';
+            } else {
+                $status = 'supported';
+            }
+            if ($version === $newest && $eol !== '' && $eol < $inTwelveMonths) {
+                $status = '**OPEN**: newest supported PHP version, add support for a newer one';
+                $this->openItems++;
+            }
+            $rows[] = [$version, $eol ?: '–', $status];
+        }
+        $this->table(['PHP', 'Security fixes until', 'Status'], $rows, '');
     }
 
     private function runTests(): void

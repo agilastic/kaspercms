@@ -59,6 +59,14 @@ beyond 2029 includes compatibility with new PHP versions.
 Dates of the free community support are taken from
 [get.typo3.org](https://get.typo3.org/).
 
+## PHP Version
+
+Run KasperCMS on a PHP version that still receives security updates from the
+PHP project, currently **PHP 8.3, 8.4 or 8.5**. TYPO3 12.4 also runs on PHP
+8.1 and 8.2, but PHP 8.1 reached its end of life on 2025-12-31 and PHP 8.2
+receives security fixes only until 2026-12-31. See the
+[supported PHP versions](https://www.php.net/supported-versions.php).
+
 ## Releases
 
 | KasperCMS version | Release date | Based on | Security fixes | Notes |

@@ -208,7 +208,9 @@ a Markdown report:
 - upstream `[SECURITY]` commits on `13.4`, `14.3` and `main` without a
   counterpart on the current branch,
 - `composer audit` (production and `require-dev` separately) and
-  `npm audit` for the bundled CKEditor packages.
+  `npm audit` for the bundled CKEditor packages,
+- the security support of the PHP versions supported by TYPO3 12.4 (open
+  item when the newest one ends within 12 months).
 
 An item counts as handled as soon as its CVE or GHSA identifier is documented
 in this file, in a coverage matrix or in a "not affected" table.

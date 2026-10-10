@@ -7,6 +7,9 @@
 | KasperCMS 12.4.45.x | :white_check_mark: | Security fixes via Ultra Long Term Support (ULTS) |
 | TYPO3 CMS 12.4.45 and older | :x: | Upgrade to the latest KasperCMS 12.4.45.x release |
 
+Run KasperCMS on a PHP version that still receives security updates
+(currently PHP 8.3, 8.4 or 8.5), see [README.md](README.md#php-version).
+
 Only the latest KasperCMS release receives security fixes. See the
 [release table](README.md#releases) and the coverage matrices in
 [ULTS-PROCESS.md](ULTS-PROCESS.md).
