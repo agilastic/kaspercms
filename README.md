@@ -38,6 +38,27 @@ fixes beyond the official free support period, which ended on 2026-04-30.
 
 Development happens on the `12.4-ults` branch.
 
+## Roadmap
+
+To keep the maintenance effort low, KasperCMS covers **every second TYPO3 LTS
+version** (12, 14, 16, …). Support for a version starts when its free TYPO3
+community support ends.
+
+| TYPO3 LTS | Free community support until | KasperCMS ULTS |
+|---|---|---|
+| 11.5 | 2024-10-31 | not planned |
+| **12.4** | 2026-04-30 | **active, at least until 2030-12-31** |
+| 13.4 | 2027-12-31 | not planned |
+| 14 LTS | 2029-06-30 | planned from 2029-07-01 |
+| 16 LTS | not yet announced | planned |
+
+Support periods are reviewed every year and extended where possible. The end
+of support for a version is announced at least 12 months in advance. Support
+beyond 2029 includes compatibility with new PHP versions.
+
+Dates of the free community support are taken from
+[get.typo3.org](https://get.typo3.org/).
+
 ## Releases
 
 | KasperCMS version | Release date | Based on | Security fixes | Notes |
