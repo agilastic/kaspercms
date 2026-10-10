@@ -1,176 +1,153 @@
-TYPO3 CMS
-=========
+<p align="center">
+  <img src="kaspercms.png" width="600"
+    alt="KasperCMS – Community-Driven Ultra Long Term Support">
+</p>
 
-TYPO3 is an open source PHP based web content management system released
-under the GNU GPL. TYPO3 is copyright © 1999-2026 by Kasper Skårhøj.
+# KasperCMS
 
-This document provides a basic introduction to TYPO3.
+**Independent Community Fork of TYPO3 CMS**
 
-Getting Started
----------------
+Community-driven Ultra Long Term Support (ULTS)
 
-TYPO3 requires a web server with PHP and a database.
-The backend is accessed via a supported browser.
+KasperCMS is an independent, open-source community fork based on TYPO3 CMS.
 
-Please see the [Installation Guide](https://docs.typo3.org/installation)
-in order to set up a basic TYPO3 installation on your web server.
+The project aims to provide extended security maintenance for TYPO3
+versions that have reached their official end of support.
 
-What is TYPO3?
---------------
+## Project Goals
 
-TYPO3 is a free and open source Content Management Framework. It is
-released under the GNU General Public License. It can run on several web
-servers, such as Apache, nginx or IIS, on top of many operating systems,
-among them Linux, Microsoft Windows, FreeBSD or macOS.
+- Free and open-source extended security maintenance
+- Community-maintained security backports
+- Long-term support for legacy TYPO3 installations
+- Minimal changes to the original TYPO3 architecture
+- Transparent development and publicly available security patches
+- No subscription required
 
-TYPO3 was initially authored by Kasper Skårhøj and is now further
-developed by a community of contributors and the [TYPO3 Core Development
-Team](https://typo3.org/community/teams/typo3-development/).
+KasperCMS backports fixes that are publicly available: from newer TYPO3
+branches, from TYPO3 security advisories and from the upstream projects of
+bundled libraries. Fixes that are not publicly available cannot be
+included. What each release covers is documented in its
+[coverage matrix](ULTS-PROCESS.md#coverage-matrix-124451).
 
-To get more info about the GPL license, visit
-https://opensource.org/licenses/gpl-license
+## Current Focus
 
-What is a Content Management Framework?
----------------------------------------
+**TYPO3 CMS 12.4 LTS**
 
-A Content Management Framework is more than just a content management
-system, due to the separation of the streamlined core and optional
-plugins (extensions). TYPO3 has an open API that allows you to extend
-the frontend (website) and/or backend (administration) functionality.
+The initial goal is to maintain a community-supported branch with security
+fixes beyond the official free support period, which ended on 2026-04-30.
 
-The concept of extensions makes TYPO3 capable of being developed and
-used in almost any way you can imagine, either by using any of the many
-extensions which are available for download, or by writing your own.
+Development happens on the `12.4-ults` branch.
 
-TYPO3 System requirements
--------------------------
+## Releases
 
-TYPO3 is based upon PHP and uses a database management system like
-MySQL.
+| KasperCMS version | Release date | Based on | Security fixes | Notes |
+|---|---|---|---|---|
+| **12.4.45.1** | 2026-10-10 | TYPO3 CMS 12.4.45 | 11 TYPO3 core CVEs, library updates | First KasperCMS release, see [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124451) |
+| 12.4.45 | 2026-04-14 | – | – | Last official community release of TYPO3 CMS 12.4 (upstream base) |
 
-For more specific information regarding requirements see the file
-[INSTALL.md](INSTALL.md#server-system-requirements) in this folder.
+The next release in development is **12.4.45.2** (`12.4.45.2-dev`).
 
-TYPO3 resources
----------------
+### Versioning
 
-Here is an overview of the most important TYPO3 resources to help you
-get started:
+KasperCMS releases are numbered `12.4.45.N` and count up independently with
+every release (`12.4.45.1`, `12.4.45.2`, …):
 
-### Get more information
+- `12.4.45` is the last official TYPO3 CMS release KasperCMS 12.4 is based
+  on.
+- Version numbers of official TYPO3 releases are never reused, so a
+  KasperCMS installation can always be told apart from an official one.
+- Composer treats four-part versions as stable and orders them directly
+  after `12.4.45`. Extension constraints like `^12.4` are satisfied.
 
-* https://typo3.org/ is the main project website. It provides up-to-date
-  official news, information about events and the TYPO3 community.
+## What KasperCMS Contains
 
-* https://docs.typo3.org/: TYPO3 is one of the most thoroughly
-  documented OpenSource products around, with manuals covering basic
-  tutorials, TypoScript, administration, development, core structure,
-  etc. You should make the time to locate the various documents, and
-  read those that apply to the work you want to do.
+- Backports of all public TYPO3 core security fixes that affect 12.4,
+  taken from the public TYPO3 branches (`13.4`, `14.3`, `main`)
+- Follow-up fixes for regressions caused by those security fixes
+- Security updates of bundled and required libraries (for example
+  CKEditor 5, Symfony 6.4, Guzzle, html-sanitizer, svg-sanitize), staying
+  within the major versions supported by TYPO3 12.4
+- No new features, no breaking changes and no upgrades to new major
+  versions of dependencies
 
-* https://get.typo3.org/ is the platform where you can download TYPO3
-  and find all release notes and change logs of TYPO3 releases.
+## Security Process
 
-* https://extensions.typo3.org/ is the platform where you can search for
-  and download TYPO3 extensions.
+Every CVE published for TYPO3 CMS is checked against three sources before
+a release:
 
-### Chat with us
+- the [OpenCVE list](https://app.opencve.io/cve/?vendor=typo3&product=typo3)
+- the [GitHub security advisories](https://github.com/TYPO3/typo3/security/advisories)
+- the TYPO3 git history (`[SECURITY]` commits and their
+  `Security-References`)
 
-The TYPO3 community is using a tool called Slack to openly communicate
-with each other and with the public. Several TYPO3 teams use Slack as a
-way to communicate internally and most channels are a welcome place for
-you to join and get yourself involved.
+A release is only made when every advisory is either fixed or documented
+as not affecting 12.4, with a reason. The complete process, including the
+commands used and the coverage matrix of each release, is described in
+**[ULTS-PROCESS.md](ULTS-PROCESS.md)**.
 
-* Register: https://my.typo3.org/about-mytypo3org/slack
-* Slack: https://typo3.slack.com/
+## Known Limitations
 
-### Exchange information, ask questions, get help
+- The core update check in the Install Tool and the Reports module query
+  get.typo3.org, which only knows official TYPO3 versions. They report a
+  KasperCMS installation as outdated or insecure.
+- Fixes that are not publicly available (no public counterpart in newer
+  TYPO3 versions or libraries) cannot be backported directly. They are ported from public upstream sources where possible,
+  or listed as open in the coverage matrix.
 
-Slack is nice for short discussions, but when asking questions, most
-answers are lost in the noise after a few minutes.
+## Reporting Security Issues
 
-#### StackOverflow
+- **Vulnerabilities in TYPO3 CMS itself**, also when found in KasperCMS:
+  report them to the TYPO3 Security Team at security@typo3.org, so that all
+  TYPO3 users benefit. See the
+  [TYPO3 Security Team](https://typo3.org/community/teams/security/) page.
+- **Problems caused by a KasperCMS backport**, for example a regression
+  introduced by an adapted fix: report them to the KasperCMS maintainers
+  through a private security advisory in this repository, not through a
+  public issue.
 
-**To let everyone profit from an answer, we recommend to ask questions
-on StackOverflow**. If you like, you can then post a link into the
-corresponding Slack channel to raise attention. And please, do not
-forget to tag your questions correctly with `typo3` (and possibly other
-tags like `typo3-9.5.x`, `Fluid` or `Extbase`).
+## Contributing
 
-* [StackOverflow questions tagged "TYPO3"](https://stackoverflow.com/questions/tagged/typo3)
+Contributions to KasperCMS (backports, tests, reviews of the coverage
+matrix) are welcome in this repository. Please follow the process in
+[ULTS-PROCESS.md](ULTS-PROCESS.md): every fix needs a public upstream
+source or a reproducing test, and must pass the test suites on PHP 8.1.
 
-#### Official meet the TYPO3 Community overview:
+Bugs and features of TYPO3 CMS itself belong upstream, see below.
 
-Visit https://typo3.org/community/meet/
+## Upstream TYPO3 CMS
 
-Contributing
-------------
+KasperCMS is based on TYPO3 CMS, an open source PHP based web content
+management system released under the GNU GPL and developed by a community
+of contributors and the
+[TYPO3 Core Development Team](https://typo3.org/community/teams/typo3-development/).
 
-If you want to contribute to the TYPO3 source code, take a look at our
-Contributors Walkthrough and Review System:
+- Project website: https://typo3.org/
+- Documentation: https://docs.typo3.org/
+- Installation guide: https://docs.typo3.org/installation
+- System requirements: [INSTALL.md](INSTALL.md#server-system-requirements)
+- Releases and release notes: https://get.typo3.org/
+- Extensions: https://extensions.typo3.org/
+- Core contribution: https://docs.typo3.org/core-contribution
+- Bug tracker: https://forge.typo3.org/projects/typo3cms-core/issues
+- Supporting TYPO3: [TYPO3 Association](https://typo3.org/association),
+  [Donate](https://typo3.org/donate)
 
-* https://docs.typo3.org/core-contribution
-* https://review.typo3.org/
+## Trademark Notice
 
-> Please use the [TYPO3 Slack chat](#chat-with-us), if you need help in
-> setting up your contribution environment. The community is very
-> helpful and get you up and running! (Please post your questions in
-> Slack Channel `#typo3-cms-coredev` regarding contribution support)
+TYPO3 is a registered trademark of the TYPO3 Association.
 
-The [repository at GitHub](https://github.com/typo3/typo3) is a
-synchronized mirror of the primary TYPO3 core git repository:
+KasperCMS is an independent community project and is not affiliated with,
+endorsed by, or sponsored by the TYPO3 Association.
 
-* https://git.typo3.org/typo3/typo3
+References to TYPO3 are used solely to identify the upstream software on
+which this project is based.
 
-If you want to file a bug report, take a look at:
+## License
 
-* [https://forge.typo3.org](https://forge.typo3.org/projects/typo3cms-core/issues)
+KasperCMS is free software, released under the GNU General Public License,
+version 2 or (at your option) any later version, like TYPO3 CMS itself. See
+[LICENSE.txt](LICENSE.txt).
 
-Security
---------
-
-If you learn about a potential security issue in the TYPO3 core or in
-an extension, please always contact the TYPO3 Security Team via security@typo3.org.
-Please always include the version number where you've discovered the issue.
-If we can confirm a problem in a third-party extension, we will inform the
-author immediately.
-
-If you discover a security problem in your own extension, please inform
-the TYPO3 Security Team as well. They can help you to fix it, and they
-may want to issue an advisory once it is fixed.
-
-For more details see [TYPO3 Security Team](https://typo3.org/community/teams/security/).
-
-Final notes
------------
-
-TYPO3 is said to be one of the most sophisticated PHP / Internet related
-applications available, and the more you play with it, the more you will
-agree.
-
-Due to the advanced level of the code and functionality, a degree of
-study, time and perseverance is required to fully understand it, and get
-the best from it. You should keep trying, as we say it's definitely
-worth it. TYPO3 is the Enterprise Content Management System "for all".
-
-The GPL license allows for developments that are based upon TYPO3 to
-also be freely available under the GPL. Please remember this, because
-TYPO3 is about "Inspiring People To Share". If you are making money with
-TYPO3 you can donate or become a member of the
-[TYPO3 Association](https://typo3.org/association).
-
-By becoming a supporting member, individuals and organisations mainly
-fund core development of TYPO3. The decision about what the funds are
-used for, is made by all members of the Association and the TYPO3
-Association Board. The decisions will be made transparent to the community
-and especially the supporting members. Your funds will also serve for
-other purposes as laid out in the bylaws.
-
-* [Donate to TYPO3](https://typo3.org/donate)
-* [Become a member of the TYPO3 Association](
-  https://typo3.org/membership)
-
-Copyleft
---------
-
-This document is a part of the TYPO3 project.
+The copyright of TYPO3 CMS remains with its original authors and
+contributors, as stated in the source files. KasperCMS backports are
+copyright of their respective authors.
