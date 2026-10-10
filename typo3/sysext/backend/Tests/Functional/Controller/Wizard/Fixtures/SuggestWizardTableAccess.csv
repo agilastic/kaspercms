@@ -1,0 +1,22 @@
+"pages",,,,,,,,,
+,"uid","pid","title","doktype","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root",1,1,10,31,31,1
+,2,1,"Website users",254,1,10,31,31,1
+,3,1,"Hidden storage",254,1,0,31,0,0
+"be_groups",,,,,,,
+,"uid","pid","title","db_mountpoints","tables_select","tables_modify","pagetypes_select"
+,10,0,"Editors",1,"pages,tt_content","pages,tt_content","1,254"
+,11,0,"Editors with fe_users",1,"pages,tt_content,fe_users,fe_groups","pages,tt_content","1,254"
+"be_users",,,,,,,
+,"uid","pid","username","usergroup","admin","deleted","options"
+,1,0,"admin",,1,0,0
+,2,0,"editor",10,0,0,3
+,3,0,"editor-fe",11,0,0,3
+"fe_users",,,,
+,"uid","pid","username","deleted"
+,1,2,"secret-customer-1",0
+,2,2,"secret-customer-2",0
+,3,3,"invisible-customer",0
+"fe_groups",,,,
+,"uid","pid","title","deleted"
+,1,2,"secret-group",0

@@ -126,6 +126,9 @@ class SuggestWizardController
             if (!is_array($GLOBALS['TCA'][$queryTable]) || empty($GLOBALS['TCA'][$queryTable])) {
                 continue;
             }
+            if (!$this->getBackendUser()->check('tables_select', $queryTable)) {
+                continue;
+            }
 
             $config = $this->getConfigurationForTable($queryTable, $wizardConfig, $pageTsConfig, $tableName, $fieldNameInPageTsConfig);
 
