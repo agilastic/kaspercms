@@ -32,9 +32,11 @@ if (PHP_SAPI !== 'cli') {
  *                 counterpart on the current branch
  * - dependencies: `composer audit` and `npm audit` (CKEditor packages)
  * - php:          security support of the PHP versions supported by TYPO3 12.4
+ * - rss:          TYPO3 core security bulletins (TYPO3-CORE-SA) of the TYPO3
+ *                 security RSS feed
  * - tests:        unit tests, PHPStan and CGL via runTests.sh (--with-tests)
  *
- * An item counts as handled when its CVE or GHSA identifier is documented in
+ * An item counts as handled when its CVE, GHSA or TYPO3-CORE-SA identifier is documented in
  * ULTS-PROCESS.md (coverage matrix or "not affected" table).
  *
  * Exit codes: 0 = no open items, 1 = open items, 2 = error
@@ -47,7 +49,7 @@ if (PHP_SAPI !== 'cli') {
  *   --since=2026-04-14         ignore advisories and commits before this date
  *   --upstream-remote=upstream git remote of TYPO3/typo3
  *   --upstream-branches=13.4,14.3,main
- *   --checks=advisories,upstream,dependencies,php
+ *   --checks=advisories,upstream,dependencies,php,rss
  *   --php-versions=8.1,8.2,8.3,8.4,8.5
  *   --fetch                    fetch the upstream branches first
  *   --with-tests               additionally run unit tests, PHPStan and CGL
@@ -60,7 +62,7 @@ final class UltsSecurityCheck
         'since' => '2026-04-14',
         'upstream-remote' => 'upstream',
         'upstream-branches' => '13.4,14.3,main',
-        'checks' => 'advisories,upstream,dependencies,php',
+        'checks' => 'advisories,upstream,dependencies,php,rss',
         'php-versions' => '8.1,8.2,8.3,8.4,8.5',
     ];
 
@@ -94,7 +96,7 @@ final class UltsSecurityCheck
         );
         $this->report[] = '';
         $this->report[] = sprintf(
-            '%d CVE/GHSA identifiers are documented in ULTS-PROCESS.md and count as handled.',
+            '%d CVE/GHSA/TYPO3-CORE-SA identifiers are documented in ULTS-PROCESS.md and count as handled.',
             count($this->documentedIds)
         );
 
@@ -107,6 +109,9 @@ final class UltsSecurityCheck
         }
         if (in_array('dependencies', $checks, true)) {
             $this->checkDependencies();
+        }
+        if (in_array('rss', $checks, true)) {
+            $this->checkSecurityFeed();
         }
         if (in_array('php', $checks, true)) {
             $this->checkPhpVersions();
@@ -367,6 +372,41 @@ final class UltsSecurityCheck
     }
 
     /**
+     * The feed does not contain affected versions, so every undocumented core
+     * bulletin is an open item that needs triage.
+     */
+    private function checkSecurityFeed(): void
+    {
+        $this->section('TYPO3 security feed (typo3.org/rss-security)');
+        $xml = @simplexml_load_string($this->exec('curl -fsSL https://typo3.org/rss-security 2>/dev/null'), \SimpleXMLElement::class, LIBXML_NONET);
+        if ($xml === false) {
+            $this->error('The TYPO3 security feed could not be fetched or parsed.');
+            return;
+        }
+        $rows = [];
+        $checked = 0;
+        foreach ($xml->channel->item ?? [] as $item) {
+            $title = trim((string)$item->title);
+            if (!preg_match('/^(TYPO3-CORE-SA-\d{4}-\d{3})/', $title, $match)) {
+                continue;
+            }
+            $published = gmdate('Y-m-d', (int)strtotime((string)$item->pubDate));
+            if ($published < $this->options['since']) {
+                continue;
+            }
+            $checked++;
+            if ($this->isDocumented([$match[1]])) {
+                continue;
+            }
+            $rows[] = [$published, $title, (string)$item->link, '**OPEN**'];
+            $this->openItems++;
+        }
+        $this->report[] = sprintf('%d core bulletins published since %s checked.', $checked, $this->options['since']);
+        $this->report[] = '';
+        $this->table(['Published', 'Bulletin', 'Link', 'Status'], $rows, 'All core bulletins are documented.');
+    }
+
+    /**
      * Only an upcoming end of security support of the newest supported PHP
      * version is an open item: KasperCMS then needs to support a newer one.
      */
@@ -439,7 +479,7 @@ final class UltsSecurityCheck
     {
         $file = $this->rootPath . '/ULTS-PROCESS.md';
         $content = is_file($file) ? (string)file_get_contents($file) : '';
-        if (preg_match_all('/\b(CVE-\d{4}-\d{4,}|GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4})\b/i', $content, $matches)) {
+        if (preg_match_all('/\b(CVE-\d{4}-\d{4,}|GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}|TYPO3-CORE-SA-\d{4}-\d{3})\b/i', $content, $matches)) {
             foreach ($matches[1] as $id) {
                 $this->documentedIds[strtoupper($id)] = true;
             }

@@ -210,10 +210,12 @@ a Markdown report:
 - `composer audit` (production and `require-dev` separately) and
   `npm audit` for the bundled CKEditor packages,
 - the security support of the PHP versions supported by TYPO3 12.4 (open
-  item when the newest one ends within 12 months).
+  item when the newest one ends within 12 months),
+- TYPO3 core bulletins (`TYPO3-CORE-SA-…`) of the TYPO3 security RSS feed
+  <https://typo3.org/rss-security>.
 
-An item counts as handled as soon as its CVE or GHSA identifier is documented
-in this file, in a coverage matrix or in a "not affected" table.
+An item counts as handled as soon as its CVE, GHSA or TYPO3-CORE-SA identifier
+is documented in this file, in a coverage matrix or in a "not affected" table.
 
 ```bash
 php Build/Scripts/ultsSecurityCheck.php --fetch               # needs gh, git remote "upstream"
