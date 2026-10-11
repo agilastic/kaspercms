@@ -57,19 +57,26 @@ class Driver extends AbstractSQLiteDriver
             unset($driverOptions['userDefinedFunctions']);
         }
 
+        $connectArguments = [
+            $this->_constructPdoDsn($params),
+            $params['user'] ?? '',
+            $params['password'] ?? '',
+            $driverOptions,
+        ];
         try {
-            $pdo = new \PDO(
-                $this->_constructPdoDsn($params),
-                $params['user'] ?? '',
-                $params['password'] ?? '',
-                $driverOptions
-            );
+            // PDO::connect() returns the driver specific Pdo\Sqlite subclass on PHP 8.4+
+            $pdo = PHP_VERSION_ID < 80400
+                ? new \PDO(...$connectArguments)
+                // @phpstan-ignore staticMethod.notFound (only called on PHP 8.4+)
+                : \PDO::connect(...$connectArguments);
         } catch (\PDOException $exception) {
             throw Exception::new($exception);
         }
 
+        // PDO::sqliteCreateFunction() is deprecated since PHP 8.5
+        $createFunction = method_exists($pdo, 'createFunction') ? 'createFunction' : 'sqliteCreateFunction';
         foreach ($this->_userDefinedFunctions as $fn => $data) {
-            $pdo->sqliteCreateFunction($fn, $data['callback'], $data['numArgs']);
+            $pdo->$createFunction($fn, $data['callback'], $data['numArgs']);
         }
 
         return new TYPO3DriverConnection($pdo);
