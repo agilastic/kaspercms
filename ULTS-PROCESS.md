@@ -265,6 +265,19 @@ every release:
 
 ## Coverage matrix: 12.4.45.4 (in development)
 
+### Frontend build toolchain
+
+`Build/package-lock.json` is only used to build the shipped assets and is
+not part of release packages. Vulnerable build tools were updated within
+their major versions (`npm update`, `js-yaml` via an override for grunt).
+Rebuilding the assets produces no changes.
+
+| Advisory | Package | Fix on `12.4-ults` |
+|---|---|---|
+| 40 Dependabot alerts (fast-uri, js-yaml, immutable, postcss, svgo, nanoid, brace-expansion, websocket-driver, …) | Build tools | Updated within their major versions |
+| ip-address, sharp, postcss-selector-parser | Build tools | Open: fixes only in a new major version |
+| extract-zip, sprintf-js | Build tools | Open: no fixed version available |
+
 ### Libraries
 
 | Advisory | Package | Fix on `12.4-ults` |
