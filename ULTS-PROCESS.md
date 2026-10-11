@@ -265,6 +265,12 @@ every release:
 
 ## Coverage matrix: 12.4.45.3 (in development)
 
+### Upstream bugfixes with security impact
+
+| Fix on `12.4-ults` | Type | Reference |
+|---|---|---|
+| Restrict backend live search to page mounts for users without page mounts | Missing authorization check, backport of a public upstream fix that was never released for 12.4 | Forge #110844 (TYPO3 13.4) |
+
 ### Development dependencies
 
 `composer/composer` is a `require-dev` dependency and not part of release
