@@ -73,7 +73,7 @@
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-svg": "^2.0.0",
     "sass": "^1.75.0",
-    "sharp": "^0.33.4",
+    "sharp": "^0.35.5",
     "sinon": "^17.0.1",
     "stylelint": "^14.16.1",
     "stylelint-order": "^5.0.0",
