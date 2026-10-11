@@ -1,0 +1,25 @@
+# KasperCMS only applies security updates within the major versions used by
+# TYPO3 12.4 (see ULTS-PROCESS.md). Version updates are disabled; the ignore
+# rules also apply to Dependabot security updates.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /Build
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    ignore:
+      # CKEditor 5 is pinned to v44.1.0 and patched via patch-package
+      - dependency-name: "@ckeditor/*"
+      - dependency-name: "ckeditor5"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
