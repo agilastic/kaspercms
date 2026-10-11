@@ -14,6 +14,22 @@ Only the latest KasperCMS release receives security fixes. See the
 [release table](README.md#releases) and the coverage matrices in
 [ULTS-PROCESS.md](ULTS-PROCESS.md).
 
+## Hardening recommendations for operators
+
+Restrict outgoing webhook requests to the hosts your installation needs by
+setting `$GLOBALS['TYPO3_CONF_VARS']['HTTP']['allowed_hosts']['webhooks']`
+in your installation configuration. An empty array blocks all webhook targets;
+without a configured host list, this restriction is not enabled.
+
+Keep `verify_ssl` enabled for every webhook and use HTTPS targets so that
+certificate validation protects the connection. Limit permissions to configure
+webhooks to administrators who need them.
+
+Restrict outgoing connections at the network level as well, including access
+to cloud metadata endpoints and internal services that webhooks do not need.
+A host allowlist alone does not guarantee that a host resolves to a public
+IP address.
+
 ## Reporting a Vulnerability
 
 Please choose the right recipient:
