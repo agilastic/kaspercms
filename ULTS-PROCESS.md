@@ -263,6 +263,14 @@ every release:
   release) cannot be cherry-picked. They are
   either ported from public upstream sources or listed as open.
 
+## Coverage matrix: 12.4.45.4 (in development)
+
+### Libraries
+
+| Advisory | Package | Fix on `12.4-ults` |
+|---|---|---|
+| GHSA-68fv-2mgg-jv7q | source-map-js | Updated to 1.2.2 in `Build/package-lock.json`. Not exploitable in release packages: the bundled `Contrib/css-tree.js` ships its own copy of the source map generator only, without the affected consumer for indexed source maps, and runs in the backend user's browser. |
+
 ## Coverage matrix: 12.4.45.3
 
 KasperCMS 12.4.45.3, released 2026-10-11. Checked against the GitHub
