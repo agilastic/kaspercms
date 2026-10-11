@@ -287,7 +287,7 @@ and raw template output).
 
 | Fix on `12.4-ults` | Type | Reference |
 |---|---|---|
-| Respect table read permissions in suggest wizard | Missing authorization (CWE-862), KasperCMS finding | No CVE assigned yet. Also affects TYPO3 13.4 and 14.x. |
+| Respect table read permissions in suggest wizard | Missing authorization check | Fixed in KasperCMS |
 | Streamline absolute path handling in `GeneralUtility::getFileAbsFileName()` | Hardening, backport of a public upstream fix that was never released for 12.4 | Forge #102995 (TYPO3 13.4) |
 
 Verification: unit tests (11722) and functional tests (7798) on PHP 8.1,
