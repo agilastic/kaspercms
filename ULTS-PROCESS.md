@@ -263,7 +263,16 @@ every release:
   release) cannot be cherry-picked. They are
   either ported from public upstream sources or listed as open.
 
-## Coverage matrix: 12.4.45.3 (in development)
+## Coverage matrix: 12.4.45.3
+
+KasperCMS 12.4.45.3, released 2026-10-11. Checked against the GitHub
+advisories, the TYPO3 security feed and the TYPO3 git history on 2026-10-11
+(automated ULTS security check): no new TYPO3 advisories affecting 12.4 were
+published since 12.4.45.2.
+
+Verification: unit tests (11722) and functional tests on PHP 8.1 in CI,
+PHPStan and CGL. The live search fix comes with tests that fail without
+the fix.
 
 ### Upstream bugfixes with security impact
 
