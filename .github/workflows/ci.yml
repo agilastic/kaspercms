@@ -61,3 +61,16 @@ jobs:
         run: Build/Scripts/runTests.sh -b docker -p 8.1 -s composer -- install --no-progress
       - name: Functional tests
         run: Build/Scripts/runTests.sh -b docker -p 8.1 -s functional -d sqlite -c ${{ matrix.chunk }}/4
+
+  php-next:
+    name: Upcoming PHP 8.6 (allowed to fail)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Composer install
+        run: Build/Scripts/runTests.sh -b docker -p 8.6 -s composer -- install --no-progress
+      - name: PHP lint
+        run: Build/Scripts/runTests.sh -b docker -p 8.6 -s lintPhp
+      - name: Unit tests
+        run: Build/Scripts/runTests.sh -b docker -p 8.6 -s unit
