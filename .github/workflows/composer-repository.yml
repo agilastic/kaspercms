@@ -1,13 +1,20 @@
 name: Composer repository
 
-# Publishes the static Composer repository for the typo3/cms-* packages of all
-# KasperCMS releases (see Build/Scripts/buildComposerRepository.php):
-# the zip archives are attached to the GitHub releases, packages.json is
-# deployed to GitHub Pages (https://agilastic.github.io/kaspercms/).
+# Publishes the KasperCMS website (Build/Website) and the static Composer
+# repository for the typo3/cms-* packages of all KasperCMS releases (see
+# Build/Scripts/buildComposerRepository.php) on GitHub Pages
+# (https://agilastic.github.io/kaspercms/). The zip archives are attached to
+# the GitHub releases.
 
 on:
   release:
     types: [published]
+  push:
+    branches: [12.4-ults]
+    paths:
+      - 'Build/Website/**'
+      - 'README.md'
+      - '.github/workflows/composer-repository.yml'
   workflow_dispatch:
 
 permissions:
@@ -34,7 +41,7 @@ jobs:
         run: gh workflow run composer-repository.yml --repo "${{ github.repository }}" --ref 12.4-ults
 
   build:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
@@ -101,21 +108,10 @@ jobs:
             [ "$present" -eq "$expected" ]
           done
 
-      - name: Prepare Pages content
+      - name: Build the website
         run: |
-          mkdir -p .cache/pages
+          php Build/Website/build.php .cache/pages
           cp .cache/composer-repository/packages.json .cache/pages/
-          cat > .cache/pages/index.html <<'EOF'
-          <!doctype html>
-          <html lang="en">
-          <head><meta charset="utf-8"><title>KasperCMS Composer repository</title></head>
-          <body>
-          <h1>KasperCMS Composer repository</h1>
-          <p>Composer repository for the <code>typo3/cms-*</code> packages of KasperCMS releases.
-          See <a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/README.md#installation-with-composer">Installation with Composer</a>.</p>
-          </body>
-          </html>
-          EOF
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

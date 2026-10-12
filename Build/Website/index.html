@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KasperCMS – Ultra Long Term Support for TYPO3 CMS 12.4</title>
+    <meta name="description" content="KasperCMS is a free, community-driven Ultra Long Term Support fork of TYPO3 CMS 12.4 with backported security fixes, careful bug fixes and full transparency.">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#1a2e52">
+    <meta property="og:title" content="KasperCMS – Ultra Long Term Support for TYPO3 CMS 12.4">
+    <meta property="og:description" content="Community-driven maintenance for TYPO3 CMS 12.4 installations.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://agilastic.github.io/kaspercms/assets/kaspercms.png">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/style.css?{{BUILD_ID}}">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+        <linearGradient id="k-arm" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#123a7a"/><stop offset="1" stop-color="#1d8cf8"/></linearGradient>
+        <linearGradient id="k-loop" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#14b4e8"/><stop offset="1" stop-color="#1d6ff2"/></linearGradient>
+        <symbol id="k" viewBox="0 0 120 120">
+            <rect class="logo-bar" x="18" y="10" width="24" height="100" rx="2"/>
+            <path d="M42 58 L86 10 L114 10 L60 70 Z" fill="url(#k-arm)"/>
+            <path d="M56 64 L112 110 L84 110 L42 76 Z" fill="#1d6ff2" opacity=".85"/>
+            <path class="logo-gap" d="M12 62 C12 42 40 42 58 62 C76 82 104 82 104 62 C104 42 76 42 58 62 C40 82 12 82 12 62 Z" fill="none" stroke-width="18" stroke-linejoin="round"/>
+            <path d="M12 62 C12 42 40 42 58 62 C76 82 104 82 104 62 C104 42 76 42 58 62 C40 82 12 82 12 62 Z" fill="none" stroke="url(#k-loop)" stroke-width="10" stroke-linejoin="round"/>
+        </symbol>
+    </defs>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+    <div class="wrap">
+        <a class="brand" href="#top" aria-label="KasperCMS home">
+            <svg aria-hidden="true"><use href="#k"/></svg>
+            <span>Kasper<b>CMS</b></span>
+        </a>
+        <nav class="nav-links" aria-label="Main">
+            <a href="#features">Features</a>
+            <a href="#install">Install</a>
+            <a href="#releases">Releases</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="#security">Security</a>
+        </nav>
+        <a class="btn btn-secondary btn-small" href="https://github.com/agilastic/kaspercms">GitHub</a>
+    </div>
+</header>
+
+<main id="main">
+    <section class="hero" id="top">
+        <div class="wrap">
+            <img class="hero-image" src="assets/kaspercms.png" width="1200" height="379" alt="KasperCMS – Community-Driven Ultra Long Term Support">
+            <h1><span class="sr-only">KasperCMS – </span><span class="gradient">Open. Transparent. Lasting.</span></h1>
+            <p class="lead">KasperCMS is a community-driven fork of TYPO3 CMS 12.4 that continues to maintain 12.4 installations after the end of community support – with backported security fixes, carefully selected bug fixes and a public record of every change.</p>
+            <div class="actions">
+                <a class="btn btn-primary" href="{{LATEST_URL}}">Download {{LATEST_VERSION}}</a>
+                <a class="btn btn-secondary" href="#install">Install with Composer</a>
+            </div>
+            <p class="meta">Latest release {{LATEST_VERSION}} · {{LATEST_DATE}} · GPL-2.0-or-later</p>
+        </div>
+    </section>
+
+    <div class="stats" aria-label="Key facts">
+        <div class="wrap">
+            <div class="stat"><strong>2030+</strong><span>Support for TYPO3 12.4</span></div>
+            <div class="stat"><strong>{{RELEASE_COUNT}}</strong><span>Releases since October 2026</span></div>
+            <div class="stat"><strong>100&nbsp;%</strong><span>Open source, GPL</span></div>
+            <div class="stat"><strong>Daily</strong><span>Automated security checks</span></div>
+        </div>
+    </div>
+
+    <section id="features">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="kicker">Why KasperCMS</span>
+                <h2>Keep what works. Fix what matters.</h2>
+                <p>Existing 12.4 sites keep running as they are. KasperCMS only changes what is needed to keep them maintained and stable.</p>
+            </div>
+            <div class="grid grid-3">
+                <article class="card">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+                    <h3>Security fixes</h3>
+                    <p>Public TYPO3 core security fixes that affect 12.4 are backported, tested on PHP 8.1 and documented with their CVE.</p>
+                </article>
+                <article class="card">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6z"/></svg></div>
+                    <h3>Careful bug fixes</h3>
+                    <p>Upstream bug fixes from TYPO3 13.4 that apply to 12.4 without risk are ported together with their tests.</p>
+                </article>
+                <article class="card">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                    <h3>Full transparency</h3>
+                    <p>A public coverage matrix for every release lists each advisory as fixed or as not affecting 12.4, with a reason.</p>
+                </article>
+                <article class="card">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+                    <h3>Drop-in replacement</h3>
+                    <p>No new features, no breaking changes, no database schema changes. Replace the source, clear the caches, done.</p>
+                </article>
+                <article class="card">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
+                    <h3>Classic or Composer</h3>
+                    <p>Use the release package with symlinks, or install the <code>typo3/cms-*</code> packages from the KasperCMS Composer repository.</p>
+                </article>
+                <article class="card">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg></div>
+                    <h3>Community-driven</h3>
+                    <p>Developed in the open on GitHub. Backports, tests and reviews of the coverage matrix are welcome.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="alt" id="process">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="kicker">How it works</span>
+                <h2>Every release follows the same process.</h2>
+                <p>Automated daily checks compare public advisories and upstream changes with the KasperCMS branch.</p>
+            </div>
+            <ol class="steps">
+                <li><h3>Monitor</h3><p>GitHub advisories, the TYPO3 security feed and upstream commits are checked every day.</p></li>
+                <li><h3>Triage</h3><p>Each advisory and bug fix is checked against the 12.4 code base and its affected versions.</p></li>
+                <li><h3>Backport &amp; test</h3><p>Fixes are cherry-picked from TYPO3 13.4, adapted to 12.4 and verified with unit and functional tests.</p></li>
+                <li><h3>Release</h3><p>A new <code>12.4.45.N</code> release with checksum, release notes and coverage matrix.</p></li>
+            </ol>
+        </div>
+    </section>
+
+    <section id="install">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="kicker">Get started</span>
+                <h2>Install in minutes.</h2>
+                <p>KasperCMS replaces the TYPO3 12.4 source of your installation. No database updates are necessary.</p>
+            </div>
+            <div class="grid grid-2">
+                <article class="card">
+                    <h3>Classic mode</h3>
+                    <p>Download the release package and point the usual symlinks to it.</p>
+<pre><code>curl -LO {{LATEST_TARBALL}}
+tar -xzf kaspercms_src-{{LATEST_VERSION}}.tar.gz
+ln -sfn kaspercms_src-{{LATEST_VERSION}} typo3_src
+ln -sfn typo3_src/typo3 typo3
+ln -sfn typo3_src/index.php index.php</code></pre>
+                    <p class="note">Verify the SHA-256 checksum from the <a href="{{LATEST_URL}}">release page</a> and clear all caches afterwards.</p>
+                </article>
+                <article class="card">
+                    <h3>Composer mode</h3>
+                    <p>Add the KasperCMS repository and require the exact KasperCMS version.</p>
+<pre><code>"repositories": [{
+    "type": "composer",
+    "url": "https://agilastic.github.io/kaspercms/",
+    "canonical": true,
+    "only": ["typo3/cms-*"]
+}],
+"require": {
+    "typo3/cms-core": "~{{LATEST_VERSION}}"
+}</code></pre>
+                    <p class="note">Composer 2.9+ blocks versions in the range of TYPO3 advisories. Allow the KasperCMS packages as described in <a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/README.md#installation-with-composer">Installation with Composer</a>.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="alt" id="releases">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="kicker">Releases</span>
+                <h2>What's new.</h2>
+                <p>Every release documents its fixes in a coverage matrix. Only the latest release receives security fixes.</p>
+            </div>
+            <ul class="releases">
+{{RELEASES}}
+            </ul>
+            <div class="actions">
+                <a class="btn btn-secondary" href="https://github.com/agilastic/kaspercms/releases">All releases on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="kicker">Roadmap</span>
+                <h2>Long-term, by design.</h2>
+                <p>To keep the effort sustainable, KasperCMS covers every second TYPO3 LTS version. Support starts when the free community support ends.</p>
+            </div>
+            <div class="roadmap">
+                <article class="card active">
+                    <h3>12.4</h3>
+                    <p>Community support ended 2026-04-30</p>
+                    <span class="status">Active, at least until 2030-12-31</span>
+                </article>
+                <article class="card">
+                    <h3>14 LTS</h3>
+                    <p>Community support until 2029-06-30</p>
+                    <span class="status">Planned from 2029-07-01</span>
+                </article>
+                <article class="card">
+                    <h3>16 LTS</h3>
+                    <p>Not yet announced</p>
+                    <span class="status">Planned</span>
+                </article>
+                <article class="card">
+                    <h3>13.4</h3>
+                    <p>Community support until 2027-12-31</p>
+                    <span class="status">Not planned</span>
+                </article>
+                <article class="card">
+                    <h3>11.5</h3>
+                    <p>Community support ended 2024-10-31</p>
+                    <span class="status">Not planned</span>
+                </article>
+            </div>
+            <p class="note" style="text-align:center">Support periods are reviewed every year. The end of support is announced at least 12 months in advance.</p>
+        </div>
+    </section>
+
+    <section class="alt" id="security">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="kicker">Security</span>
+                <h2>Found a vulnerability?</h2>
+                <p>Please do not report vulnerabilities in public issues. Choose the right recipient:</p>
+            </div>
+            <div class="grid grid-2">
+                <article class="card">
+                    <h3>In TYPO3 CMS itself</h3>
+                    <p>Also when found in KasperCMS: report it to the TYPO3 Security Team at <a href="mailto:security@typo3.org">security@typo3.org</a>, so that all TYPO3 users benefit from the fix.</p>
+                </article>
+                <article class="card">
+                    <h3>Specific to KasperCMS</h3>
+                    <p>For example a regression introduced by an adapted backport: report it privately through a <a href="https://github.com/agilastic/kaspercms/security/advisories/new">GitHub security advisory</a> of the KasperCMS repository.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="wrap">
+            <h2>Help maintain 12.4 together.</h2>
+            <p>KasperCMS is a community effort. Backports, tests and reviews of the coverage matrix are welcome.</p>
+            <div class="actions">
+                <a class="btn btn-primary" href="https://github.com/agilastic/kaspercms">Contribute on GitHub</a>
+                <a class="btn btn-secondary" href="https://github.com/agilastic/kaspercms/blob/12.4-ults/ULTS-PROCESS.md">Read the ULTS process</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap">
+        <div>
+            <a class="brand" href="#top" aria-label="KasperCMS home">
+                <svg aria-hidden="true"><use href="#k"/></svg>
+                <span>Kasper<b>CMS</b></span>
+            </a>
+            <p>Independent community project, released under the GNU General Public License, version 2 or later, and provided without warranty. Not affiliated with the TYPO3 Association, see the <a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/README.md#trademark-notice">trademark notice</a>.</p>
+        </div>
+        <div>
+            <h4>Project</h4>
+            <ul>
+                <li><a href="https://github.com/agilastic/kaspercms">Source code</a></li>
+                <li><a href="https://github.com/agilastic/kaspercms/releases">Releases</a></li>
+                <li><a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/ULTS-PROCESS.md">ULTS process &amp; coverage matrix</a></li>
+                <li><a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/CONTRIBUTING.md">Contributing</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Resources</h4>
+            <ul>
+                <li><a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/SECURITY.md">Security policy</a></li>
+                <li><a href="packages.json">Composer repository</a></li>
+                <li><a href="https://docs.typo3.org/">TYPO3 documentation</a></li>
+                <li><a href="https://typo3.org/">TYPO3 CMS</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+        if (!navigator.clipboard) {
+            return;
+        }
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'copy';
+        button.textContent = 'Copy';
+        button.addEventListener('click', function () {
+            navigator.clipboard.writeText(pre.querySelector('code').textContent).then(function () {
+                button.textContent = 'Copied';
+                setTimeout(function () { button.textContent = 'Copy'; }, 1500);
+            });
+        });
+        pre.appendChild(button);
+    });
+</script>
+</body>
+</html>
