@@ -104,6 +104,84 @@ valid Composer version, and a number like `12.4.1004` would look like an
 official release and make advisory scanners treat KasperCMS as newer than
 every official fix, also for fixes that are not backported yet.
 
+## Installation with Composer
+
+Composer 2.9 and newer refuse to install package versions that are affected
+by known security advisories (`policy.advisories.block`, enabled by default).
+Advisory databases compare version numbers only: `12.4.45.N` falls into the
+ranges of all TYPO3 advisories fixed after 12.4.45, also when KasperCMS
+contains the fix. Composer then stops with "these were not loaded, because
+they are affected by security advisories".
+
+Allow the KasperCMS packages in the root `composer.json` of your project.
+Composer 2.10 does not support wildcards or version constraints for this
+setting, so every `typo3/cms-*` package has to be listed, including those
+that are only required by extensions:
+
+<details>
+<summary>Policy configuration for all TYPO3 12.4 packages</summary>
+
+```json
+{
+    "config": {
+        "policy": {
+            "advisories": {
+                "ignore": {
+                    "typo3/cms-adminpanel": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-backend": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-belog": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-beuser": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-core": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-dashboard": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-extbase": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-extensionmanager": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-felogin": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-filelist": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-filemetadata": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-fluid": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-fluid-styled-content": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-form": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-frontend": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-impexp": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-indexed-search": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-info": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-install": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-linkvalidator": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-lowlevel": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-opendocs": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-reactions": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-recycler": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-redirects": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-reports": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-rte-ckeditor": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-scheduler": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-seo": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-setup": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-sys-note": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-t3editor": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-tstemplate": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-viewpage": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-webhooks": {"reason": "KasperCMS", "on-audit": false},
+                    "typo3/cms-workspaces": {"reason": "KasperCMS", "on-audit": false}
+                }
+            }
+        }
+    }
+}
+```
+
+</details>
+
+- `"on-audit": false` limits the exception to installing. `composer audit`
+  still reports the advisories; whether they are fixed in KasperCMS or do not
+  affect 12.4 is documented in the coverage matrix in
+  [ULTS-PROCESS.md](ULTS-PROCESS.md).
+- The exception applies to all versions of these packages. Require the
+  exact KasperCMS version (for example `"typo3/cms-core": "12.4.45.4"`) from
+  the KasperCMS sources, so that Composer cannot fall back to an official
+  TYPO3 release with known vulnerabilities.
+- Remove the configuration when switching back to official TYPO3 releases.
+
 ## What KasperCMS Contains
 
 - Backports of all public TYPO3 core security fixes that affect 12.4,
@@ -146,6 +224,9 @@ commands used and the coverage matrix of each release, is described in
   KasperCMS release, also when KasperCMS contains the fix. Whether an
   advisory is fixed or does not affect 12.4 is documented in the coverage
   matrix in [ULTS-PROCESS.md](ULTS-PROCESS.md).
+- Composer 2.9+ refuses to install KasperCMS packages unless they are
+  allowed in `policy.advisories.ignore`, see
+  [Installation with Composer](#installation-with-composer).
 - Tools that expect exactly three version parts may fail on `12.4.45.N`.
   Known case: DDEV reports "Invalid Semantic Version" and writes its
   database settings to the legacy `typo3conf/AdditionalConfiguration.php`.

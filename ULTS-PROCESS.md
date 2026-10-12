@@ -343,6 +343,9 @@ every release:
 - Advisory scanners compare version numbers only and report advisories fixed
   after 12.4.45 for every KasperCMS release. The coverage matrix is the
   reference for what is fixed.
+- Composer 2.9+ blocks KasperCMS packages because of the advisory ranges;
+  installations need a `policy.advisories.ignore` entry per package, see the
+  [README](README.md#installation-with-composer).
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
