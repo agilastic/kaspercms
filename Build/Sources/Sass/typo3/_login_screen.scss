@@ -13,7 +13,8 @@ $login-width: 320px;
 $login-width-large: 960px;
 $login-bg: #eee;
 $login-border-radius: 3px;
-$login-highlight: #f80;
+// KasperCMS: blue of the KasperCMS logo instead of #f80 (contrast 4.56:1 with white)
+$login-highlight: #1d6ff2;
 $login-btn-text: #fff;
 $login-btn-bg: $login-highlight;
 $login-copyright-text: #444;

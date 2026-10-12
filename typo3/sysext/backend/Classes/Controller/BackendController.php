@@ -214,8 +214,8 @@ class BackendController
         // if no custom logo was set or the path is invalid, use the original one
         if (empty($logoPath) || !file_exists($logoPath)) {
             $logoPath = GeneralUtility::getFileAbsFileName('EXT:backend/Resources/Public/Images/kaspercms_logo.svg');
-            $logoWidth = 22;
-            $logoHeight = 22;
+            $logoWidth = 28;
+            $logoHeight = 28;
         } else {
             // set width/height for custom logo
             $imageInfo = GeneralUtility::makeInstance(ImageInfo::class, $logoPath);

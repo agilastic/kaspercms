@@ -4175,7 +4175,7 @@ body[data-typo3-login-ready]{overflow-y:auto}
 .card-login{border-color:#d5d5d5;border-radius:3px;overflow:visible}
 .card-login .card-heading{padding:2.5em 2.5em 0;border-top-left-radius:2px;border-top-right-radius:2px}
 .card-login .card-body{padding:1.75em 2.5em 2.5em}
-.card-login .card-footer{padding:1.5em 2.5em;border-top:3px solid #f80;border-bottom-left-radius:2px;border-bottom-right-radius:2px}
+.card-login .card-footer{padding:1.5em 2.5em;border-top:3px solid #1d6ff2;border-bottom-left-radius:2px;border-bottom-right-radius:2px}
 .card-login a{font-weight:700}
 .card-login a:focus-visible{outline:1px solid #1a1d1d;outline-offset:1px}
 @media (max-width:767.98px){
@@ -4187,7 +4187,7 @@ select.input-login{height:43.2px;line-height:43.2px}
 select[multiple].input-login,textarea.input-login{height:auto}
 .input-login{border-color:#949494}
 .input-login:active,.input-login:active:focus,.input-login:active:hover,.input-login:focus,.input-login:hover{outline:1px solid #000;outline-offset:-1px}
-.btn-login{--bs-btn-padding-y:12px;--bs-btn-padding-x:12px;--bs-btn-font-size:0.75rem;--bs-btn-border-radius:2px;--bs-btn-color:#fff;--bs-btn-bg:#f80;--bs-btn-border-color:rgba(0, 0, 0, 0.1);--bs-btn-hover-color:#fff;--bs-btn-hover-bg:#d97400;--bs-btn-hover-border-color:rgba(0, 0, 0, 0.1);--bs-btn-focus-shadow-rgb:196,196,196;--bs-btn-active-color:#fff;--bs-btn-active-bg:#cc6d00;--bs-btn-active-border-color:rgba(0, 0, 0, 0.325);--bs-btn-active-shadow:inset 0 3px 5px rgba(0, 0, 0, 0.125);--bs-btn-disabled-color:#000;--bs-btn-disabled-bg:#f80;--bs-btn-disabled-border-color:rgba(0, 0, 0, 0.1);line-height:1.3em;white-space:normal}
+.btn-login{--bs-btn-padding-y:12px;--bs-btn-padding-x:12px;--bs-btn-font-size:0.75rem;--bs-btn-border-radius:2px;--bs-btn-color:#fff;--bs-btn-bg:#1d6ff2;--bs-btn-border-color:rgba(0, 0, 0, 0.1);--bs-btn-hover-color:#fff;--bs-btn-hover-bg:#0d5ddc;--bs-btn-hover-border-color:rgba(0, 0, 0, 0.1);--bs-btn-focus-shadow-rgb:196,196,196;--bs-btn-active-color:#fff;--bs-btn-active-bg:#1759c2;--bs-btn-active-border-color:rgba(0, 0, 0, 0.325);--bs-btn-active-shadow:inset 0 3px 5px rgba(0, 0, 0, 0.125);--bs-btn-disabled-color:#fff;--bs-btn-disabled-bg:#1d6ff2;--bs-btn-disabled-border-color:rgba(0, 0, 0, 0.1);line-height:1.3em;white-space:normal}
 .typo3-login-carousel{padding:2.5em}
 .typo3-login-carousel-control{top:50%;margin-top:-30px;height:60px;line-height:60px;width:20px;background-color:#fff;text-align:center;position:absolute;opacity:.75;padding:0;transition:opacity .2s ease-in-out}
 @media (prefers-reduced-motion:reduce){
