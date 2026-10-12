@@ -92,6 +92,18 @@ every release (`12.4.45.1`, `12.4.45.2`, …):
 - Composer treats four-part versions as stable and orders them directly
   after `12.4.45`. Extension constraints like `^12.4` are satisfied.
 
+`12.4.45` follows TYPO3's MAJOR.MINOR.PATCH scheme. The fourth part `N` is
+the KasperCMS revision below PATCH: like a patch release, a revision only
+contains security fixes and bug fixes, never new features or breaking
+changes. Four-part numbers are not Semantic Versioning, so tools that expect
+exactly three parts may fail to parse them (see
+[Known Limitations](#known-limitations)).
+
+Alternative schemes were rejected: a suffix like `12.4.45-ults.4` is not a
+valid Composer version, and a number like `12.4.1004` would look like an
+official release and make advisory scanners treat KasperCMS as newer than
+every official fix, also for fixes that are not backported yet.
+
 ## What KasperCMS Contains
 
 - Backports of all public TYPO3 core security fixes that affect 12.4,
@@ -129,6 +141,18 @@ commands used and the coverage matrix of each release, is described in
 - Fixes that are not publicly available (no public counterpart in newer
   TYPO3 versions or libraries) cannot be backported directly. They are ported from public upstream sources where possible,
   or listed as open in the coverage matrix.
+- Advisory scanners (`composer audit`, Dependabot, …) compare version
+  numbers only. They report TYPO3 advisories fixed after 12.4.45 for every
+  KasperCMS release, also when KasperCMS contains the fix. Whether an
+  advisory is fixed or does not affect 12.4 is documented in the coverage
+  matrix in [ULTS-PROCESS.md](ULTS-PROCESS.md).
+- Tools that expect exactly three version parts may fail on `12.4.45.N`.
+  Known case: DDEV reports "Invalid Semantic Version" and writes its
+  database settings to the legacy `typo3conf/AdditionalConfiguration.php`.
+  TYPO3 12.4 moves that file to `typo3conf/system/additional.php` once
+  (deprecated migration) and ignores later versions of it. Workaround: move
+  the file to `typo3conf/system/additional.php` yourself and set
+  `disable_settings_management: true` in `.ddev/config.yaml`.
 
 ## Reporting Security Issues
 

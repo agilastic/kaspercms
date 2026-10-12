@@ -315,6 +315,9 @@ every release:
 - Composer treats four-part versions as stable and orders them directly
   after `12.4.45`.
 - Version numbers of official TYPO3 releases are never reused.
+- `N` is a revision below PATCH: it contains security fixes and bug fixes
+  only, like a TYPO3 patch release. See the
+  [README](README.md#versioning) for the reasons behind the four-part scheme.
 
 ### Steps
 
@@ -337,6 +340,11 @@ every release:
 - Fixes that are not public (no 13.4/14.x counterpart, no public library
   release) cannot be cherry-picked. They are
   either ported from public upstream sources or listed as open.
+- Advisory scanners compare version numbers only and report advisories fixed
+  after 12.4.45 for every KasperCMS release. The coverage matrix is the
+  reference for what is fixed.
+- Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
+  see the [README](README.md#known-limitations).
 
 ## Coverage matrix: 12.4.45.4
 
