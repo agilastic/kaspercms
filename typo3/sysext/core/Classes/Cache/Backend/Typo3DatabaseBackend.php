@@ -280,17 +280,12 @@ class Typo3DatabaseBackend extends AbstractBackend implements TaggableBackendInt
             array_walk($chunks, [$this, 'flushByTags']);
             return;
         }
-        // VERY simple quoting of tags is sufficient here for performance. Tags are already
-        // validated to not contain any bad characters, e.g. they are automatically generated
-        // inside this class and suffixed with a pure integer enforced by DB.
-        $quotedTagList = array_map(static function ($value) {
-            return '\'' . $value . '\'';
-        }, $tags);
-
         $queryBuilder = $connection->createQueryBuilder();
         $result = $queryBuilder->select('identifier')
             ->from($this->tagsTable)
-            ->where('tag IN (' . implode(',', $quotedTagList) . ')')
+            ->where(
+                $queryBuilder->expr()->in('tag', $queryBuilder->quoteArrayBasedValueListToStringList($tags)),
+            )
             // group by is like DISTINCT and used here to suppress possible duplicate identifiers
             ->groupBy('identifier')
             ->executeQuery();
@@ -319,12 +314,12 @@ class Typo3DatabaseBackend extends AbstractBackend implements TaggableBackendInt
 
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->cacheTable);
 
-        $quotedTag = '\'' . $tag . '\'';
-
         $queryBuilder = $connection->createQueryBuilder();
         $result = $queryBuilder->select('identifier')
             ->from($this->tagsTable)
-            ->where('tag = ' . $quotedTag)
+            ->where(
+                $queryBuilder->expr()->eq('tag', $queryBuilder->quote($tag)),
+            )
             // group by is like DISTINCT and used here to suppress possible duplicate identifiers
             ->groupBy('identifier')
             ->executeQuery();

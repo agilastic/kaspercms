@@ -427,6 +427,26 @@ final class Typo3DatabaseBackendTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function flushByTagQuotesTag(): void
+    {
+        $subject = $this->getSubjectObject();
+        $subject->flushByTag('tagX\' OR \'1\'=\'1');
+
+        $cacheTableConnection = (new ConnectionPool())->getConnectionForTable('cache_pages');
+        self::assertSame(3, $cacheTableConnection->count('*', 'cache_pages', []));
+    }
+
+    #[Test]
+    public function flushByTagsQuotesTags(): void
+    {
+        $subject = $this->getSubjectObject();
+        $subject->flushByTags(['tagX', 'tagY\') OR (\'1\'=\'1']);
+
+        $cacheTableConnection = (new ConnectionPool())->getConnectionForTable('cache_pages');
+        self::assertSame(3, $cacheTableConnection->count('*', 'cache_pages', []));
+    }
+
+    #[Test]
     public function collectGarbageWorksWithEmptyTable(): void
     {
         $subject = $this->getSubjectObject();

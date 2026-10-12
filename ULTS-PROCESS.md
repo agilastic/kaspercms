@@ -265,6 +265,12 @@ every release:
 
 ## Coverage matrix: 12.4.45.4 (in development)
 
+### Hardening
+
+| Fix on `12.4-ults` | Type | Reference |
+|---|---|---|
+| Quote cache tags in `Typo3DatabaseBackend::flushByTag()` and `flushByTags()` | Hardening against SQL injection when the backend is called directly with unvalidated tags (core calls go through the validating cache frontend), quoting ported from a public upstream fix that was never released for 12.4 | Forge #106006 (TYPO3 13.4) |
+
 ### Frontend build toolchain
 
 `Build/package-lock.json` is only used to build the shipped assets and is
