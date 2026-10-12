@@ -1,0 +1,58 @@
+name: ULTS bug fix check
+
+on:
+  schedule:
+    # every Monday, 05:00 UTC (07:00 CEST)
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+
+      - name: Add TYPO3 upstream remote
+        run: git remote add upstream https://github.com/TYPO3/typo3.git
+
+      - name: Run bug fix check
+        id: check
+        run: |
+          set +e
+          php Build/Scripts/ultsSecurityCheck.php --checks=bugfixes --fetch > report.md
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create or update issue
+        if: steps.check.outputs.status == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create ults-bugfixes --color 0E8A16 \
+            --description "Upstream bug fixes to triage for backporting" 2>/dev/null || true
+          number=$(gh issue list --label ults-bugfixes --state open --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            # only comment when the candidates changed since the last report
+            gh issue view "$number" --json body,comments \
+              --jq '(.comments | last | .body) // .body' > previous.md
+            if diff -q <(grep -v '^Date: ' previous.md) <(grep -v '^Date: ' report.md) > /dev/null; then
+              echo "Candidates unchanged, issue #$number not updated."
+            else
+              gh issue comment "$number" --body-file report.md
+            fi
+          else
+            gh issue create --title "ULTS bug fix check: upstream bug fixes to triage" \
+              --label ults-bugfixes --body-file report.md
+          fi
+
+      - name: Fail if the check could not be completed
+        if: steps.check.outputs.status == '2'
+        run: exit 1

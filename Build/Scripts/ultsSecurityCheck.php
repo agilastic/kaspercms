@@ -35,9 +35,14 @@ if (PHP_SAPI !== 'cli') {
  * - rss:          TYPO3 core security bulletins (TYPO3-CORE-SA) of the TYPO3
  *                 security RSS feed
  * - tests:        unit tests, PHPStan and CGL via runTests.sh (--with-tests)
+ * - bugfixes:     [BUGFIX] commits on the upstream bug fix branch (13.4) without
+ *                 a counterpart on the current branch (not part of the default
+ *                 checks, use --checks=bugfixes)
  *
  * An item counts as handled when its CVE, GHSA or TYPO3-CORE-SA identifier is documented in
- * ULTS-PROCESS.md (coverage matrix or "not affected" table).
+ * ULTS-PROCESS.md (coverage matrix or "not affected" table). An upstream bug
+ * fix counts as handled when it was cherry-picked or its commit hash (11
+ * characters) is documented in ULTS-PROCESS.md.
  *
  * Exit codes: 0 = no open items, 1 = open items, 2 = error
  *
@@ -51,6 +56,7 @@ if (PHP_SAPI !== 'cli') {
  *   --upstream-branches=13.4,14.3,main
  *   --checks=advisories,upstream,dependencies,php,rss
  *   --php-versions=8.1,8.2,8.3,8.4,8.5
+ *   --bugfix-branch=13.4       upstream branch checked for bug fixes
  *   --fetch                    fetch the upstream branches first
  *   --with-tests               additionally run unit tests, PHPStan and CGL
  */
@@ -64,12 +70,15 @@ final class UltsSecurityCheck
         'upstream-branches' => '13.4,14.3,main',
         'checks' => 'advisories,upstream,dependencies,php,rss',
         'php-versions' => '8.1,8.2,8.3,8.4,8.5',
+        'bugfix-branch' => '13.4',
     ];
 
     private string $rootPath;
     private array $options;
     /** @var array<string, true> */
     private array $documentedIds = [];
+    /** @var array<string, true> */
+    private array $documentedCommits = [];
     /** @var list<string> */
     private array $report = [];
     private int $openItems = 0;
@@ -116,6 +125,9 @@ final class UltsSecurityCheck
         if (in_array('php', $checks, true)) {
             $this->checkPhpVersions();
         }
+        if (in_array('bugfixes', $checks, true)) {
+            $this->checkUpstreamBugfixes();
+        }
         if (isset($this->options['with-tests'])) {
             $this->runTests();
         }
@@ -127,7 +139,7 @@ final class UltsSecurityCheck
             $this->report[] = sprintf('**%d check(s) could not be completed.** See the messages above.', $this->errors);
         }
         $this->report[] = $this->openItems > 0
-            ? sprintf('**%d open item(s)** need triage (see ULTS-PROCESS.md, step 2).', $this->openItems)
+            ? sprintf('**%d open item(s)** need triage (see ULTS-PROCESS.md).', $this->openItems)
             : 'No open items.';
 
         echo implode(PHP_EOL, $this->report) . PHP_EOL;
@@ -213,22 +225,11 @@ final class UltsSecurityCheck
             }
         }
 
-        $ownSubjects = [];
-        $ownCherryPicks = [];
-        $ownLog = $this->exec(sprintf('git log %s..HEAD --format=%s', escapeshellarg($this->options['base-ref']), escapeshellarg('%s%x1f%b%x1e')), $exitCode);
-        if ($exitCode !== 0) {
-            $this->error(sprintf('Base ref "%s" not found.', $this->options['base-ref']));
+        $ownCommits = $this->loadOwnCommits();
+        if ($ownCommits === null) {
             return;
         }
-        foreach (array_filter(explode("\x1e", $ownLog), 'trim') as $entry) {
-            [$subject, $body] = array_pad(explode("\x1f", trim($entry), 2), 2, '');
-            $ownSubjects[trim($subject)] = true;
-            if (preg_match_all('/cherry picked from commit ([0-9a-f]{40})/', $body, $matches)) {
-                foreach ($matches[1] as $sha) {
-                    $ownCherryPicks[$sha] = true;
-                }
-            }
-        }
+        [$ownSubjects, $ownCherryPicks] = $ownCommits;
 
         $seenSubjects = [];
         $rows = [];
@@ -273,6 +274,108 @@ final class UltsSecurityCheck
             $rows,
             $this->errors === $errorsBefore ? 'All upstream security commits are covered or documented.' : ''
         );
+    }
+
+    /**
+     * Lists upstream bug fixes that are neither backported nor documented as
+     * not backported. Whether a fix is backportable is decided manually, see
+     * ULTS-PROCESS.md, "Bug fix backports".
+     */
+    private function checkUpstreamBugfixes(): void
+    {
+        $branch = $this->options['bugfix-branch'];
+        $this->section(sprintf('Upstream [BUGFIX] commits (%s)', $branch));
+        $ref = $this->options['upstream-remote'] . '/' . $branch;
+        if (isset($this->options['fetch'])) {
+            $this->exec(sprintf('git fetch --quiet %s %s 2>&1', escapeshellarg($this->options['upstream-remote']), escapeshellarg($branch)), $exitCode);
+            if ($exitCode !== 0) {
+                $this->error(sprintf('Could not fetch from remote "%s".', $this->options['upstream-remote']));
+                return;
+            }
+        }
+        $ownCommits = $this->loadOwnCommits();
+        if ($ownCommits === null) {
+            return;
+        }
+        [$ownSubjects, $ownCherryPicks] = $ownCommits;
+
+        $log = $this->exec(sprintf(
+            'git log %s --since=%s --reverse --grep=%s --format=%s',
+            escapeshellarg($ref),
+            escapeshellarg($this->options['since']),
+            escapeshellarg('^\[BUGFIX\]'),
+            escapeshellarg('%H%x1f%ad%x1f%s%x1f%(trailers:key=Resolves,valueonly,separator=%x2C)%x1e') . ' --date=short'
+        ), $exitCode);
+        if ($exitCode !== 0) {
+            $this->error(sprintf('Upstream ref "%s" not found. Add the remote and use --fetch.', $ref));
+            return;
+        }
+        $rows = [];
+        $checked = 0;
+        $backported = 0;
+        $documented = 0;
+        foreach (array_filter(explode("\x1e", $log), 'trim') as $entry) {
+            [$sha, $date, $subject, $resolves] = array_pad(explode("\x1f", trim($entry), 4), 4, '');
+            $subject = trim($subject);
+            $checked++;
+            if (isset($ownSubjects[$subject]) || isset($ownCherryPicks[$sha])) {
+                $backported++;
+                continue;
+            }
+            if (isset($this->documentedCommits[substr($sha, 0, 11)])) {
+                $documented++;
+                continue;
+            }
+            $this->exec(sprintf('git show --format= %s | git apply --check 2>/dev/null', escapeshellarg($sha)), $applyExitCode);
+            $rows[] = [
+                substr($sha, 0, 11),
+                $date,
+                $subject,
+                trim($resolves) !== '' ? trim($resolves) : '–',
+                $applyExitCode === 0 ? 'yes' : 'conflicts',
+            ];
+            $this->openItems++;
+        }
+        $this->report[] = sprintf(
+            '%d upstream bug fixes since %s checked: %d backported, %d documented as not backported, %d to triage.',
+            $checked,
+            $this->options['since'],
+            $backported,
+            $documented,
+            count($rows)
+        );
+        $this->report[] = '';
+        $this->table(
+            ['Commit', 'Date', 'Subject', 'Resolves', 'Applies cleanly'],
+            $rows,
+            'All upstream bug fixes are backported or documented.'
+        );
+    }
+
+    /**
+     * Subjects and cherry-picked upstream commits of the current branch since the base ref.
+     *
+     * @return array{0: array<string, true>, 1: array<string, true>}|null
+     */
+    private function loadOwnCommits(): ?array
+    {
+        $ownSubjects = [];
+        $ownCherryPicks = [];
+        $ownLog = $this->exec(sprintf('git log %s..HEAD --format=%s', escapeshellarg($this->options['base-ref']), escapeshellarg('%s%x1f%b%x1e')), $exitCode);
+        if ($exitCode !== 0) {
+            $this->error(sprintf('Base ref "%s" not found.', $this->options['base-ref']));
+            return null;
+        }
+        foreach (array_filter(explode("\x1e", $ownLog), 'trim') as $entry) {
+            [$subject, $body] = array_pad(explode("\x1f", trim($entry), 2), 2, '');
+            $ownSubjects[trim($subject)] = true;
+            if (preg_match_all('/cherry picked from commit ([0-9a-f]{40})/', $body, $matches)) {
+                foreach ($matches[1] as $sha) {
+                    $ownCherryPicks[$sha] = true;
+                }
+            }
+        }
+        return [$ownSubjects, $ownCherryPicks];
     }
 
     private function checkDependencies(): void
@@ -482,6 +585,11 @@ final class UltsSecurityCheck
         if (preg_match_all('/\b(CVE-\d{4}-\d{4,}|GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}|TYPO3-CORE-SA-\d{4}-\d{3})\b/i', $content, $matches)) {
             foreach ($matches[1] as $id) {
                 $this->documentedIds[strtoupper($id)] = true;
+            }
+        }
+        if (preg_match_all('/`([0-9a-f]{11})`/', $content, $matches)) {
+            foreach ($matches[1] as $sha) {
+                $this->documentedCommits[$sha] = true;
             }
         }
     }
