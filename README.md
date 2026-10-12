@@ -222,7 +222,7 @@ project name and the list of packages.
 - Backports of all public TYPO3 core security fixes that affect 12.4,
   taken from the public TYPO3 branches (`13.4`, `14.3`, `main`)
 - Follow-up fixes for regressions caused by those security fixes
-- Backports of upstream bug fixes from the `13.4` branch that apply to 12.4
+- Backports of upstream bug fixes from the `13.4` and 14.x branches that apply to 12.4
   without risk: no new features, no API or database schema changes (see
   [bug fix backports](ULTS-PROCESS.md#bug-fix-backports))
 - Security updates of bundled and required libraries (for example

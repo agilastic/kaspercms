@@ -14,7 +14,7 @@ KasperCMS 12.4 receives:
 
 - **Security fixes:** all public TYPO3 core security fixes that affect 12.4
   (steps 1–8 below), including follow-up fixes for regressions caused by them.
-- **Bug fixes:** upstream bug fixes from the `13.4` branch that can be
+- **Bug fixes:** upstream bug fixes from the `13.4` and 14.x branches that can be
   backported to 12.4 without risk (see [Bug fix backports](#bug-fix-backports)).
 - **Dependency updates:** security updates and patch-level updates of bundled
   and required libraries, staying within the major versions supported by
@@ -250,8 +250,10 @@ check, so that bug fix candidates never hide security findings. See
 ## Bug fix backports
 
 Upstream bug fixes are taken from the `13.4` branch, the closest code base to
-12.4. Fixes that only exist on `14.3` or `main` usually concern code that 12.4
-does not have.
+12.4, and from the 14.x branches (`14.3`, `main`). Most 14.x bug fixes are
+also released for 13.4; fixes that only exist on 14.x are backported when the
+affected code also exists in 12.4. The bug fix check covers `13.4` by default;
+run it with `--bugfix-branch=14.3` for 14.x.
 
 ### Criteria
 
