@@ -2652,12 +2652,12 @@ body{height:100%}
 body.with-overflow{overflow:auto}
 .scaffold{display:flex;flex-wrap:wrap;background-color:#f5f5f5;color:#333;position:relative;height:100vh}
 .scaffold-header{flex:0 0 100%;position:sticky;top:0;z-index:1000;display:flex;flex-flow:row wrap;align-items:stretch;height:45px}
-.scaffold-topbar{background-color:#151515;color:#f5f5f5;height:45px;flex:1 0 auto}
-.scaffold-modulemenu{background-color:#292929;color:#f5f5f5;top:45px;width:auto;height:calc(100vh - 45px);max-width:100%;overflow-x:hidden;overflow-y:auto;color-scheme:dark;position:absolute;z-index:1051}
+.scaffold-topbar{background-color:#1a2e52;color:#f5f5f5;height:45px;flex:1 0 auto}
+.scaffold-modulemenu{background-color:#243f71;color:#f5f5f5;top:45px;width:auto;height:calc(100vh - 45px);max-width:100%;overflow-x:hidden;overflow-y:auto;color-scheme:dark;position:absolute;z-index:1051}
 @media (min-width:992px){
 .scaffold-modulemenu{z-index:1000;position:sticky}
 }
-.scaffold-toolbar{background-color:#292929;color:#f5f5f5;z-index:1000;display:none}
+.scaffold-toolbar{background-color:#243f71;color:#f5f5f5;z-index:1000;display:none}
 .scaffold-toolbar .toolbar-item-link{color:rgba(245,245,245,.7)}
 .scaffold-toolbar .toolbar-item-link:focus,.scaffold-toolbar .toolbar-item-link:hover{color:#f5f5f5}
 .scaffold-toolbar .toolbar-item-link:after{display:none}
@@ -2665,7 +2665,7 @@ body.with-overflow{overflow:auto}
 @media (min-width:992px){
 .scaffold-toolbar{overflow:visible;background-color:transparent;height:45px;inset-inline-start:auto;bottom:auto;display:block}
 }
-.scaffold-toolbar-expanded .scaffold-toolbar .toolbar{background-color:#292929}
+.scaffold-toolbar-expanded .scaffold-toolbar .toolbar{background-color:#243f71}
 @media (max-width:991.98px){
 .scaffold-toolbar-expanded .scaffold-toolbar{min-height:calc(100vh - 45px);padding:8px;flex:1 0 100%;display:block}
 }
@@ -2704,18 +2704,18 @@ body.with-overflow{overflow:auto}
 typo3-backend-navigation-switcher{display:flex}
 .topbar{background-color:inherit;position:relative;height:45px}
 .topbar a{color:inherit;text-decoration:none}
-.topbar-button{color:#f5f5f5;position:absolute;top:0;display:inline-flex;justify-content:center;align-items:center;border:0;background-color:#151515;height:45px;width:40px;outline:0}
-.topbar-button:focus,.topbar-button:hover{background-color:#1d1d1d}
+.topbar-button{color:#f5f5f5;position:absolute;top:0;display:inline-flex;justify-content:center;align-items:center;border:0;background-color:#1a2e52;height:45px;width:40px;outline:0}
+.topbar-button:focus,.topbar-button:hover{background-color:#1e355e}
 .topbar-button:focus-visible{box-shadow:inset 0 0 0 1px #000,inset 0 0 0 2px #fff}
-.topbar-button[disabled],.topbar-button[disabled]:focus,.topbar-button[disabled]:hover{background-color:#292929;cursor:not-allowed;opacity:.5}
+.topbar-button[disabled],.topbar-button[disabled]:focus,.topbar-button[disabled]:hover{background-color:#243f71;cursor:not-allowed;opacity:.5}
 .topbar-button.topbar-button-modulemenu{inset-inline-start:0}
 @media (min-width:992px){
-.topbar-button.topbar-button-modulemenu{background-color:#292929}
+.topbar-button.topbar-button-modulemenu{background-color:#243f71}
 }
 .topbar-button.topbar-button-toolbar{inset-inline-end:40px}
 .topbar-button.topbar-button-search{inset-inline-end:0}
-.scaffold-modulemenu-expanded .topbar-button.topbar-button-modulemenu{background-color:#292929}
-.scaffold-toolbar-expanded .topbar-button-toolbar{background-color:#292929}
+.scaffold-modulemenu-expanded .topbar-button.topbar-button-modulemenu{background-color:#243f71}
+.scaffold-toolbar-expanded .topbar-button-toolbar{background-color:#243f71}
 .topbar-button-search,.topbar-button-toolbar{display:inline-flex}
 @media (min-width:992px){
 .topbar-button-search,.topbar-button-toolbar{display:none}
@@ -2728,8 +2728,8 @@ typo3-backend-navigation-switcher{display:flex}
 .topbar-header-site a{display:inline-block;outline:0;padding-inline-start:.5rem;padding-inline-end:.5rem;margin-inline-start:-.5rem}
 .topbar-header-site a:focus-visible{box-shadow:inset 0 0 0 1px #000,inset 0 0 0 2px #fff}
 .topbar-header-site:after,.topbar-header-site:before{display:block;content:"";position:absolute;top:0;bottom:0;width:1em}
-.topbar-header-site:before{inset-inline-end:0;background:#151515}
-.topbar-header-site:after{inset-inline-end:1em;background:linear-gradient(to var(--typo3-position-end),rgba(21,21,21,0) 0,#151515 100%)}
+.topbar-header-site:before{inset-inline-end:0;background:#1a2e52}
+.topbar-header-site:after{inset-inline-end:1em;background:linear-gradient(to var(--typo3-position-end),rgba(26,46,82,0) 0,#1a2e52 100%)}
 .typo3-in-workspace .topbar-header-site{background-color:#6d860d}
 .typo3-in-workspace .topbar-header-site:before{background:#6d860d}
 .typo3-in-workspace .topbar-header-site:after{background:linear-gradient(to right,rgba(109,134,13,0) 0,#6d860d 100%)}
@@ -2741,7 +2741,7 @@ typo3-backend-navigation-switcher{display:flex}
 .topbar-header-site-title{line-height:1.2em;display:inline-block;vertical-align:middle}
 .topbar-header-site-name{display:block}
 .topbar-header-site-version{opacity:.5}
-.toolbar{display:flex;padding:0;background-color:#151515}
+.toolbar{display:flex;padding:0;background-color:#1a2e52}
 .toolbar-list{display:flex;list-style:none;padding:0;margin:0;gap:.5rem;flex-wrap:wrap}
 @media (min-width:992px){
 .toolbar-list{gap:1px}
@@ -2769,11 +2769,11 @@ typo3-backend-navigation-switcher{display:flex}
 .toolbar-item-link{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(0,0,0,.5);position:relative;display:flex;align-items:center;gap:.35em;text-decoration:none;padding:9px 10px;height:45px;line-height:27px;outline:0}
 .toolbar-item-link:focus,.toolbar-item-link:hover{text-decoration:none}
 .toolbar-item-link:focus-visible{box-shadow:inset 0 0 0 1px #000,inset 0 0 0 2px #fff}
-.toolbar-item-link.show{background-color:#292929}
+.toolbar-item-link.show{background-color:#243f71}
 @media (min-width:992px){
 .toolbar-item-link{border:none}
 }
-.open .toolbar-item-link{background-color:#292929}
+.open .toolbar-item-link{background-color:#243f71}
 @media (min-width:992px){
 .toolbar-item-title{display:none}
 .toolbar-item-badge{top:auto;bottom:4px;inset-inline-end:4px}

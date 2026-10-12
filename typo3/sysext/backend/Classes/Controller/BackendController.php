@@ -202,7 +202,7 @@ class BackendController
      */
     protected function assignTopbarDetailsToView(ServerRequestInterface $request, ViewInterface $view): void
     {
-        // Extension Configuration to find the TYPO3 logo in the left corner
+        // Extension Configuration to find the KasperCMS logo in the left corner
         $extConf = $this->extensionConfiguration->get('backend');
         $logoPath = '';
         if (!empty($extConf['backendLogo'])) {
@@ -213,7 +213,7 @@ class BackendController
         }
         // if no custom logo was set or the path is invalid, use the original one
         if (empty($logoPath) || !file_exists($logoPath)) {
-            $logoPath = GeneralUtility::getFileAbsFileName('EXT:backend/Resources/Public/Images/typo3_logo_orange.svg');
+            $logoPath = GeneralUtility::getFileAbsFileName('EXT:backend/Resources/Public/Images/kaspercms_logo.svg');
             $logoWidth = 22;
             $logoHeight = 22;
         } else {

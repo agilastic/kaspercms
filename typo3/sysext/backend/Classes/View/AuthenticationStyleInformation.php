@@ -118,17 +118,12 @@ class AuthenticationStyleInformation implements LoggerAwareInterface
 
     public function getDefaultLogo(): string
     {
-        // Use TYPO3 logo depending on highlight color
-        $logo = ((string)($this->backendExtensionConfiguration['loginHighlightColor'] ?? '') !== '')
-            ? 'EXT:core/Resources/Public/Images/typo3_black.svg'
-            : 'EXT:core/Resources/Public/Images/typo3_orange.svg';
-
-        return $this->getUriForFileName($logo);
+        return $this->getUriForFileName('EXT:backend/Resources/Public/Images/kaspercms_login_logo.svg');
     }
 
     public function getDefaultLogoStyles(): string
     {
-        return '.typo3-login-logo .typo3-login-image { max-width: 150px; height:100%;}';
+        return '.typo3-login-logo .typo3-login-image { max-width: 260px; height:100%;}';
     }
 
     public function getSupportingImages(): array

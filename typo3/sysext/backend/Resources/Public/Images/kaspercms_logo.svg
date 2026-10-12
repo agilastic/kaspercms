@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="KasperCMS"><title>KasperCMS</title>
+  <defs>
+    <linearGradient id="t-arm" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#1d8cf8"/><stop offset="1" stop-color="#7cc4ff"/></linearGradient>
+    <linearGradient id="t-loop" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#14b4e8"/><stop offset="1" stop-color="#1d6ff2"/></linearGradient>
+  </defs>
+  <rect x="18" y="10" width="24" height="100" rx="2" fill="#ffffff"/>
+  <path d="M42 58 L86 10 L114 10 L60 70 Z" fill="url(#t-arm)"/>
+  <path d="M56 64 L112 110 L84 110 L42 76 Z" fill="#1d8cf8"/>
+  <path d="M12 62 C12 42 40 42 58 62 C76 82 104 82 104 62 C104 42 76 42 58 62 C40 82 12 82 12 62 Z" fill="none" stroke="#1a2e52" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M12 62 C12 42 40 42 58 62 C76 82 104 82 104 62 C104 42 76 42 58 62 C40 82 12 82 12 62 Z" fill="none" stroke="url(#t-loop)" stroke-width="10" stroke-linejoin="round"/>
+</svg>

@@ -193,6 +193,11 @@ that are only required by extensions:
 - Security updates of bundled and required libraries (for example
   CKEditor 5, Symfony 6.4, Guzzle, html-sanitizer, svg-sanitize), staying
   within the major versions supported by TYPO3 12.4
+- KasperCMS branding in the backend: the KasperCMS logo in the top bar and
+  on the login page and backend colours taken from the logo, so that a
+  KasperCMS installation can be told apart from an official TYPO3 one at a
+  glance. A custom `backendLogo`, `loginLogo` or `loginHighlightColor` in the
+  backend extension configuration still takes precedence.
 - No new features, no breaking changes and no upgrades to new major
   versions of dependencies
 

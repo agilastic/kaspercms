@@ -129,7 +129,7 @@ $toolbar-navigation-search-focus-bg: $toolbar-dropdown-link-active-bg;
     }
 
     &.show {
-        background-color: #292929;
+        background-color: $scaffold-toolbar-bg;
     }
 
     @include media-breakpoint-up('lg') {
@@ -139,7 +139,7 @@ $toolbar-navigation-search-focus-bg: $toolbar-dropdown-link-active-bg;
 
 .open {
     .toolbar-item-link {
-        background-color: #292929;
+        background-color: $scaffold-toolbar-bg;
     }
 }
 
