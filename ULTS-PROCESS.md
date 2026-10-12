@@ -338,7 +338,18 @@ every release:
   release) cannot be cherry-picked. They are
   either ported from public upstream sources or listed as open.
 
-## Coverage matrix: 12.4.45.4 (in development)
+## Coverage matrix: 12.4.45.4
+
+KasperCMS 12.4.45.4, released 2026-10-12. Checked against the GitHub
+advisories, the TYPO3 security feed and the TYPO3 git history on 2026-10-12
+(automated ULTS security check): no new TYPO3 advisories affecting 12.4 were
+published since 12.4.45.3. First release with upstream bug fix backports.
+
+Verification: unit tests (11749) on PHP 8.1, 8.5 and 8.6 and functional
+tests (SQLite) in CI, PHPStan, CGL and the integrity checks of step 6. The
+functional tests of the cache, DataHandler default values, console command
+list, CSP policy provider, mount points and the install tool also ran on
+MariaDB 10.3.
 
 ### Bug fixes
 
