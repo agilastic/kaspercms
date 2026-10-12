@@ -331,6 +331,12 @@ every release:
 4. Add the release with its date to the
    [release table in the README](README.md#releases) and publish
    release notes with the coverage matrix (see below).
+5. Publish the GitHub release with the tarball and its checksum. The workflow
+   `.github/workflows/composer-repository.yml` then attaches the Composer
+   archives of all `typo3/cms-*` packages to the release, updates
+   `packages.json` and rebuilds the website
+   (<https://agilastic.github.io/kaspercms/>, source in `Build/Website/`,
+   release data from the README release table).
 
 ### Known limitations
 

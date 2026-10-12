@@ -107,17 +107,52 @@ every official fix, also for fixes that are not backported yet.
 
 ## Installation with Composer
 
-Composer 2.9 and newer refuse to install package versions that are affected
-by known security advisories (`policy.advisories.block`, enabled by default).
-Advisory databases compare version numbers only: `12.4.45.N` falls into the
-ranges of all TYPO3 advisories fixed after 12.4.45, also when KasperCMS
-contains the fix. Composer then stops with "these were not loaded, because
-they are affected by security advisories".
+KasperCMS provides a Composer repository for the `typo3/cms-*` packages of
+every release at <https://agilastic.github.io/kaspercms/>. The package
+archives are attached to the GitHub releases, `packages.json` lists them with
+their SHA-1 checksums.
 
-Allow the KasperCMS packages in the root `composer.json` of your project.
-Composer 2.10 does not support wildcards or version constraints for this
-setting, so every `typo3/cms-*` package has to be listed, including those
-that are only required by extensions:
+### New project
+
+```bash
+mkdir my-site && cd my-site
+curl -LO https://agilastic.github.io/kaspercms/example/composer.json
+composer install
+```
+
+The [example `composer.json`](https://agilastic.github.io/kaspercms/example/composer.json)
+contains everything described below for the latest release. Adapt the
+project name and the list of packages.
+
+### Existing project
+
+1. Add the KasperCMS repository to the root `composer.json`:
+
+   ```json
+   "repositories": [{
+       "type": "composer",
+       "url": "https://agilastic.github.io/kaspercms/",
+       "canonical": true,
+       "only": ["typo3/cms-*"]
+   }]
+   ```
+
+   `"canonical": true` makes Composer take the `typo3/cms-*` packages only
+   from KasperCMS, so it never falls back to an official TYPO3 release from
+   Packagist. `"only"` keeps all other packages on Packagist.
+
+2. Require the KasperCMS version, for example
+   `"typo3/cms-core": "~12.4.45.5"`. The `~` constraint allows later
+   KasperCMS releases (`12.4.45.6`, …), but not official TYPO3 versions.
+
+3. Allow the KasperCMS packages in the advisory blocking of Composer 2.9 and
+   newer (`policy.advisories.block`, enabled by default). Advisory databases
+   compare version numbers only: `12.4.45.N` falls into the ranges of all
+   TYPO3 advisories fixed after 12.4.45, also when KasperCMS contains the fix,
+   and Composer stops with "these were not loaded, because they are affected
+   by security advisories". Composer 2.10 does not support wildcards or
+   version constraints for this setting, so every `typo3/cms-*` package has
+   to be listed, including those that are only required by extensions:
 
 <details>
 <summary>Policy configuration for all TYPO3 12.4 packages</summary>
@@ -177,11 +212,10 @@ that are only required by extensions:
   still reports the advisories; whether they are fixed in KasperCMS or do not
   affect 12.4 is documented in the coverage matrix in
   [ULTS-PROCESS.md](ULTS-PROCESS.md).
-- The exception applies to all versions of these packages. Require the
-  exact KasperCMS version (for example `"typo3/cms-core": "12.4.45.4"`) from
-  the KasperCMS sources, so that Composer cannot fall back to an official
-  TYPO3 release with known vulnerabilities.
-- Remove the configuration when switching back to official TYPO3 releases.
+- The exception applies to all versions of these packages. The canonical
+  KasperCMS repository makes sure that only KasperCMS releases are installed.
+- Remove the repository and the policy configuration when switching back to
+  official TYPO3 releases.
 
 ## What KasperCMS Contains
 
