@@ -94,6 +94,51 @@ if (!is_dir($outputPath . '/assets') && !mkdir($outputPath . '/assets', 0775, tr
     exit(2);
 }
 file_put_contents($outputPath . '/index.html', $html);
+
+// Complete example composer.json for Composer mode, see the install section
+$packageNames = [];
+foreach (glob($rootPath . '/typo3/sysext/*/composer.json') as $manifestFile) {
+    $packageNames[] = json_decode((string)file_get_contents($manifestFile), true)['name'];
+}
+sort($packageNames);
+$constraint = '~' . $latest['version'];
+$required = ['backend', 'belog', 'beuser', 'core', 'dashboard', 'extbase', 'extensionmanager', 'felogin', 'filelist', 'fluid', 'fluid-styled-content', 'form', 'frontend', 'impexp', 'info', 'install', 'lowlevel', 'redirects', 'reports', 'rte-ckeditor', 'scheduler', 'seo', 'setup', 'tstemplate', 'viewpage'];
+$ignore = [];
+foreach ($packageNames as $packageName) {
+    $ignore[$packageName] = [
+        'reason' => 'KasperCMS: fixed advisories are documented in the coverage matrix of ULTS-PROCESS.md',
+        'on-audit' => false,
+    ];
+}
+$example = [
+    'name' => 'my-vendor/my-site',
+    'description' => 'TYPO3 CMS 12.4 project based on KasperCMS',
+    'type' => 'project',
+    'license' => 'GPL-2.0-or-later',
+    'repositories' => [[
+        'type' => 'composer',
+        'url' => 'https://agilastic.github.io/kaspercms/',
+        'canonical' => true,
+        'only' => ['typo3/cms-*'],
+    ]],
+    'require' => array_combine(
+        array_map(static fn(string $key): string => 'typo3/cms-' . $key, $required),
+        array_fill(0, count($required), $constraint)
+    ),
+    'config' => [
+        'allow-plugins' => [
+            'typo3/class-alias-loader' => true,
+            'typo3/cms-composer-installers' => true,
+        ],
+        'sort-packages' => true,
+        'policy' => ['advisories' => ['ignore' => $ignore]],
+    ],
+    'extra' => ['typo3/cms' => ['web-dir' => 'public']],
+];
+if (!is_dir($outputPath . '/example')) {
+    mkdir($outputPath . '/example', 0775, true);
+}
+file_put_contents($outputPath . '/example/composer.json', json_encode($example, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 foreach (glob($sourcePath . '/assets/*') as $asset) {
     copy($asset, $outputPath . '/assets/' . basename($asset));
 }

@@ -149,17 +149,11 @@ ln -sfn typo3_src/index.php index.php</code></pre>
                 </article>
                 <article class="card">
                     <h3>Composer mode</h3>
-                    <p>Add the KasperCMS repository and require the exact KasperCMS version.</p>
-<pre><code>"repositories": [{
-    "type": "composer",
-    "url": "https://agilastic.github.io/kaspercms/",
-    "canonical": true,
-    "only": ["typo3/cms-*"]
-}],
-"require": {
-    "typo3/cms-core": "~{{LATEST_VERSION}}"
-}</code></pre>
-                    <p class="note">Composer 2.9+ blocks versions in the range of TYPO3 advisories. Allow the KasperCMS packages as described in <a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/README.md#installation-with-composer">Installation with Composer</a>.</p>
+                    <p>Start from the example <code>composer.json</code> and adapt name and packages.</p>
+<pre><code>mkdir my-site &amp;&amp; cd my-site
+curl -LO https://agilastic.github.io/kaspercms/example/composer.json
+composer install</code></pre>
+                    <p class="note">The <a href="example/composer.json">example</a> adds the KasperCMS repository as canonical source for <code>typo3/cms-*</code> and allows the KasperCMS versions in the advisory blocking of Composer 2.9+. Details in <a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/README.md#installation-with-composer">Installation with Composer</a>.</p>
                 </article>
             </div>
         </div>
