@@ -292,11 +292,15 @@ contains them.
 
 ### Upstream bug fixes not backported
 
-Triage of the candidates since 2026-04-14 is in progress. Decisions are
+Triage of the candidates since 2026-04-14 is in progress: candidates that
+apply cleanly are done, candidates with conflicts are pending. Decisions are
 added here, so that the bug fix check does not report them again.
 
 | Commit (13.4) | Subject | Reason |
 |---|---|---|
+| `1acb4681598` | Handle multibyte characters in TypoScript | Changes the TypoScript parsing result of existing installations: lines with multibyte identifiers, ignored so far, would become active |
+| `2c703f5aaec` | Evaluate sortDesc parameter correctly in indexed_search | Reverses the order of search results of existing installations |
+| `9e3ace89048` | Remove garbage collected rows in batches | Deferred: needs an adaptation to Doctrine DBAL 3 (`Table::getPrimaryKeyConstraint()` is DBAL 4) and to the 12.4 table configuration |
 
 ## 8. Release
 
@@ -338,8 +342,43 @@ every release:
 
 ### Bug fixes
 
-No upstream bug fixes backported yet. See
-[Bug fix backports](#bug-fix-backports).
+Upstream bug fixes from `13.4` (see [Bug fix backports](#bug-fix-backports)).
+Where upstream added tests, they fail on the code without the fix and pass
+with it, except the paginator test, which only fails on PHP 8.5+.
+Adaptations to 12.4: "Run cache GC in chunks" imports `PlatformInformation`
+(added upstream by an earlier 13.4 change), and the record history test does
+not use the publish action, which 12.4 does not record.
+
+| Fix on `12.4-ults` | Reference |
+|---|---|
+| Return modified object in PreviewUriBuilder::withRootLine | Forge #109609 |
+| Combine mtime and filesize for package cache identifier | Forge #109653 |
+| Run cache GC in chunks | Forge #109897 |
+| Respect position "top" in EMU::addTcaSelectItemGroup() | Forge #108977 |
+| Create missing var/transient in Directory Status check | Forge #109813 |
+| Properly backport avoid using null as array offset | Forge #110078 |
+| List `extension:activate` in list of possible commands | Forge #99396 |
+| Add accessible label to language flag in content element header | Forge #108465 |
+| Make LogRecord writeable ArrayAccess / offsetSet | Forge #110220 |
+| Ensure that failed attempts to send via MemorySpool are logged | Forge #110174 |
+| Resolve subpages of translated mount points | Forge #104252 |
+| Allow non-scheme protocol URI as CSP site base | Forge #110263 |
+| Fix exception on initial TYPO3 setup with empty database | Forge #110381 |
+| Do not split paragraphs at inner linebreaks | Forge #88556 |
+| Fix PCRE regex breaking suggest wizard on line breaks | Forge #110329 |
+| Avoid deadlock in console command tests | Forge #110481 |
+| Use TypoScript from request in CObjectViewHelper | Forge #110496 |
+| Make CGL suites work in git worktrees | Forge #110534 |
+| Restrict allowed characters of pages cache tags | Forge #107828 |
+| Do not treat moved records as deleted in record history | Forge #110585 |
+| Ensure admin access in "redirects:cleanup" command | Forge #110620 |
+| Preserve route target when MFA intercepts a route request | Forge #109133 |
+| Suppress warnings from `GeneralUtility::writeFile()` | Forge #110707 |
+| Reset page TCAdefaults for each new record | Forge #110705 |
+| Quote container binary check in runTests.sh | Forge #107967 |
+| Prevent integer overflow in paginator offset calculation | Forge #110827 |
+| Support schemeless URLs in forceAbsoluteUrl() | Forge #108603 |
+| Respect abort override in pre-commit hook | Forge #110879 |
 
 ### Hardening
 
