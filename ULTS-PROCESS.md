@@ -1,13 +1,29 @@
 # KasperCMS 12.4 – Ultra Long Term Support (ULTS) process
 
-This document describes how security fixes are tracked, backported, verified
-and released for KasperCMS, the independent community fork of TYPO3 CMS 12.4,
-after the end of regular community support (2026-04-30). The list of KasperCMS
-releases is in the [README](README.md#releases).
+This document describes how security fixes and bug fixes are tracked,
+backported, verified and released for KasperCMS, the independent community
+fork of TYPO3 CMS 12.4, after the end of regular community support
+(2026-04-30). The list of KasperCMS releases is in the
+[README](README.md#releases).
 
 See the [trademark notice](README.md#trademark-notice) in the README.
 
-## Overview
+## Scope
+
+KasperCMS 12.4 receives:
+
+- **Security fixes:** all public TYPO3 core security fixes that affect 12.4
+  (steps 1–8 below), including follow-up fixes for regressions caused by them.
+- **Bug fixes:** upstream bug fixes from the `13.4` branch that can be
+  backported to 12.4 without risk (see [Bug fix backports](#bug-fix-backports)).
+- **Dependency updates:** security updates and patch-level updates of bundled
+  and required libraries, staying within the major versions supported by
+  TYPO3 12.4.
+
+New features, breaking changes, database schema changes and upgrades to new
+major versions of dependencies are out of scope.
+
+## Overview (security fixes)
 
 ```mermaid
 flowchart TD
@@ -227,6 +243,61 @@ completed. The workflow `.github/workflows/ults-security-check.yml` runs the
 check every day at 04:00 UTC and creates an issue labelled `ults-check` when
 open items are found, or comments on it when the findings change. Triage (step 2) and backports stay manual.
 
+The bug fix check (`--checks=bugfixes`) is not part of the daily security
+check, so that bug fix candidates never hide security findings. See
+[Bug fix backports](#bug-fix-backports).
+
+## Bug fix backports
+
+Upstream bug fixes are taken from the `13.4` branch, the closest code base to
+12.4. Fixes that only exist on `14.3` or `main` usually concern code that 12.4
+does not have.
+
+### Criteria
+
+An upstream `[BUGFIX]` commit is backported when all of the following apply:
+
+- It was merged after the base release 12.4.45 (2026-04-14) and is not part
+  of 12.4 yet.
+- The affected code exists in 12.4, and the bug can occur in 12.4.
+- It does not add features, change public APIs or behaviour that
+  installations rely on, change the database schema, require configuration
+  changes or raise dependencies to a new major version.
+- It can be adapted to 12.4 without a larger refactoring (see step 5).
+
+Bug fixes with security impact are treated like security fixes and listed in
+the coverage matrix of the release, even when upstream did not publish an
+advisory (example: Forge #110844 in 12.4.45.3).
+
+### Workflow
+
+```bash
+# Candidates: upstream bug fixes that are neither backported nor documented
+php Build/Scripts/ultsSecurityCheck.php --checks=bugfixes --fetch
+
+# Backport like a security fix (steps 4–6)
+git cherry-pick -x <13.4-commit>
+```
+
+The report lists every candidate with its Forge issue and whether it applies
+cleanly to the current branch. A candidate counts as handled when it was
+cherry-picked (detected by the subject or the `cherry picked from commit`
+line) or when its commit hash is listed in the table below with a reason.
+
+The workflow `.github/workflows/ults-bugfix-check.yml` runs this check every
+Monday at 05:00 UTC and keeps an issue labelled `ults-bugfixes` up to date.
+
+Backported bug fixes are listed in the coverage matrix of the release that
+contains them.
+
+### Upstream bug fixes not backported
+
+Triage of the candidates since 2026-04-14 is in progress. Decisions are
+added here, so that the bug fix check does not report them again.
+
+| Commit (13.4) | Subject | Reason |
+|---|---|---|
+
 ## 8. Release
 
 <a id="versioning"></a>
@@ -264,6 +335,11 @@ every release:
   either ported from public upstream sources or listed as open.
 
 ## Coverage matrix: 12.4.45.4 (in development)
+
+### Bug fixes
+
+No upstream bug fixes backported yet. See
+[Bug fix backports](#bug-fix-backports).
 
 ### Hardening
 

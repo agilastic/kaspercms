@@ -1,7 +1,8 @@
 # Contributing to KasperCMS
 
 KasperCMS is a community effort. Contributions are welcome: backports of
-security fixes, tests, reviews of the coverage matrix and documentation.
+security fixes and bug fixes, tests, reviews of the coverage matrix and
+documentation.
 
 ## How to contribute
 
@@ -16,9 +17,11 @@ security fixes, tests, reviews of the coverage matrix and documentation.
      TYPO3 12.4.
 3. Open a pull request against `12.4-ults`.
 
-KasperCMS only accepts security fixes, fixes for regressions caused by them
-and security updates of dependencies. New features and breaking changes are
-out of scope.
+KasperCMS accepts security fixes, fixes for regressions caused by them,
+backportable upstream bug fixes (see
+[bug fix backports](ULTS-PROCESS.md#bug-fix-backports)) and security updates
+of dependencies. New features, breaking changes and database schema changes
+are out of scope.
 
 ## Security issues
 

@@ -11,13 +11,13 @@ Community-driven Ultra Long Term Support (ULTS)
 
 KasperCMS is an independent, open-source community fork based on TYPO3 CMS.
 
-The project aims to provide extended security maintenance for TYPO3
-versions that have reached their official end of support.
+The project aims to provide extended maintenance (security fixes and bug
+fixes) for TYPO3 versions that have reached their official end of support.
 
 ## Project Goals
 
-- Free and open-source extended security maintenance
-- Community-maintained security backports
+- Free and open-source extended maintenance
+- Community-maintained backports of security fixes and bug fixes
 - Long-term support for legacy TYPO3 installations
 - Minimal changes to the original TYPO3 architecture
 - Transparent development and publicly available security patches
@@ -34,7 +34,8 @@ in [ULTS-PROCESS.md](ULTS-PROCESS.md).
 **TYPO3 CMS 12.4 LTS**
 
 The initial goal is to maintain a community-supported branch with security
-fixes beyond the official free support period, which ended on 2026-04-30.
+fixes and bug fixes beyond the official free support period, which ended on
+2026-04-30.
 
 Development happens on the `12.4-ults` branch.
 
@@ -69,7 +70,7 @@ receives security fixes only until 2026-12-31. See the
 
 ## Releases
 
-| KasperCMS version | Release date | Based on | Security fixes | Notes |
+| KasperCMS version | Release date | Based on | Fixes | Notes |
 |---|---|---|---|---|
 | **12.4.45.3** | 2026-10-11 | KasperCMS 12.4.45.2 | Backend live search page mounts | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124453) |
 | 12.4.45.2 | 2026-10-10 | KasperCMS 12.4.45.1 | Suggest wizard table permissions, absolute path handling | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124452) |
@@ -95,6 +96,9 @@ every release (`12.4.45.1`, `12.4.45.2`, …):
 - Backports of all public TYPO3 core security fixes that affect 12.4,
   taken from the public TYPO3 branches (`13.4`, `14.3`, `main`)
 - Follow-up fixes for regressions caused by those security fixes
+- Backports of upstream bug fixes from the `13.4` branch that apply to 12.4
+  without risk: no new features, no API or database schema changes (see
+  [bug fix backports](ULTS-PROCESS.md#bug-fix-backports))
 - Security updates of bundled and required libraries (for example
   CKEditor 5, Symfony 6.4, Guzzle, html-sanitizer, svg-sanitize), staying
   within the major versions supported by TYPO3 12.4
@@ -138,8 +142,8 @@ commands used and the coverage matrix of each release, is described in
 
 ## Contributing
 
-Contributions to KasperCMS (backports, tests, reviews of the coverage
-matrix) are welcome in this repository. Please follow the process in
+Contributions to KasperCMS (backports of security fixes and bug fixes,
+tests, reviews of the coverage matrix) are welcome in this repository. Please follow the process in
 [ULTS-PROCESS.md](ULTS-PROCESS.md): every fix needs a public upstream
 source or a reproducing test, and must pass the test suites on PHP 8.1.
 
