@@ -1,0 +1,134 @@
+name: Composer repository
+
+# Publishes the static Composer repository for the typo3/cms-* packages of all
+# KasperCMS releases (see Build/Scripts/buildComposerRepository.php):
+# the zip archives are attached to the GitHub releases, packages.json is
+# deployed to GitHub Pages (https://agilastic.github.io/kaspercms/).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: composer-repository-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  # Only 12.4-ults may deploy to the github-pages environment, while release
+  # events run on the tag. Restart this workflow on the branch instead
+  # (workflow_dispatch is allowed with GITHUB_TOKEN).
+  dispatch:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run this workflow on 12.4-ults
+        run: gh workflow run composer-repository.yml --repo "${{ github.repository }}" --ref 12.4-ults
+
+  build:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Check git archive --mtime support
+        run: |
+          git --version
+          git archive -h 2>&1 | grep -q -- '--mtime'
+
+      - name: Build archives and packages.json
+        run: php Build/Scripts/buildComposerRepository.php --output=.cache/composer-repository
+
+      - name: Attach missing archives to the releases
+        run: |
+          cd .cache/composer-repository
+          for tag in $(git tag --list 'v12.4.45.*' | sort -V); do
+            version="${tag#v}"
+            [ "$version" = "12.4.45" ] && continue
+            if ! gh release view "$tag" > /dev/null 2>&1; then
+              echo "::error::Release $tag does not exist."
+              exit 1
+            fi
+            existing=$(gh release view "$tag" --json assets --jq '.assets[].name')
+            missing=()
+            for file in *-"$version".zip; do
+              grep -qxF "$file" <<< "$existing" || missing+=("$file")
+            done
+            if [ ${#missing[@]} -gt 0 ]; then
+              echo "$tag: uploading ${#missing[@]} archive(s)"
+              gh release upload "$tag" "${missing[@]}"
+            else
+              echo "$tag: all archives present"
+            fi
+          done
+
+      - name: Verify the uploaded archives
+        run: |
+          php -r '
+            $packages = json_decode(file_get_contents(".cache/composer-repository/packages.json"), true)["packages"];
+            $failed = 0;
+            foreach ($packages as $name => $versions) {
+                foreach ($versions as $version => $package) {
+                    $file = ".cache/composer-repository/" . basename($package["dist"]["url"]);
+                    if (sha1_file($file) !== $package["dist"]["shasum"]) {
+                        fwrite(STDERR, "Checksum mismatch: $name $version\n");
+                        $failed++;
+                    }
+                }
+            }
+            exit($failed > 0 ? 1 : 0);
+          '
+          for tag in $(git tag --list 'v12.4.45.*' | sort -V); do
+            version="${tag#v}"
+            [ "$version" = "12.4.45" ] && continue
+            expected=$(ls .cache/composer-repository/*-"$version".zip | wc -l)
+            present=$(gh release view "$tag" --json assets --jq "[.assets[].name | select(endswith(\"-$version.zip\"))] | length")
+            echo "$tag: $present of $expected archives attached"
+            [ "$present" -eq "$expected" ]
+          done
+
+      - name: Prepare Pages content
+        run: |
+          mkdir -p .cache/pages
+          cp .cache/composer-repository/packages.json .cache/pages/
+          cat > .cache/pages/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><title>KasperCMS Composer repository</title></head>
+          <body>
+          <h1>KasperCMS Composer repository</h1>
+          <p>Composer repository for the <code>typo3/cms-*</code> packages of KasperCMS releases.
+          See <a href="https://github.com/agilastic/kaspercms/blob/12.4-ults/README.md#installation-with-composer">Installation with Composer</a>.</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .cache/pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
