@@ -349,6 +349,25 @@ every release:
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
+## Coverage matrix: 12.4.45.5
+
+KasperCMS 12.4.45.5, released 2026-10-12. Checked against the GitHub
+advisories, the TYPO3 security feed and the TYPO3 git history on 2026-10-12
+(automated ULTS security check): no new TYPO3 advisories affecting 12.4 were
+published since 12.4.45.4. This release contains no security or bug fixes.
+
+### Other changes
+
+| Change on `12.4-ults` | Notes |
+|---|---|
+| KasperCMS logo in the backend top bar and on the login page | New vector SVGs in `EXT:backend/Resources/Public/Images/`; a configured `backendLogo` or `loginLogo` still takes precedence |
+| Backend colours of the KasperCMS logo | Navy `#1a2e52` for top bar, toolbar and module menu; login highlight `#1d6ff2` (contrast 4.6:1 instead of 2.4:1); a configured `loginHighlightColor` still takes precedence |
+| Documentation | Four-part version scheme, Composer advisory blocking (`policy.advisories.ignore`), DDEV limitation |
+
+Verification: unit tests on PHP 8.1, 8.5 and 8.6 and functional tests
+(SQLite) in CI, PHPStan and CGL. The backend and the login page were
+checked in the browser.
+
 ## Coverage matrix: 12.4.45.4
 
 KasperCMS 12.4.45.4, released 2026-10-12. Checked against the GitHub

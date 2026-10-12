@@ -72,13 +72,14 @@ receives security fixes only until 2026-12-31. See the
 
 | KasperCMS version | Release date | Based on | Fixes | Notes |
 |---|---|---|---|---|
-| **12.4.45.4** | 2026-10-12 | KasperCMS 12.4.45.3 | 28 upstream bug fixes, cache tag quoting, build tool updates | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124454) |
+| **12.4.45.5** | 2026-10-12 | KasperCMS 12.4.45.4 | – (no new advisories) | KasperCMS logo and colours in the backend, see [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124455) |
+| 12.4.45.4 | 2026-10-12 | KasperCMS 12.4.45.3 | 28 upstream bug fixes, cache tag quoting, build tool updates | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124454) |
 | 12.4.45.3 | 2026-10-11 | KasperCMS 12.4.45.2 | Backend live search page mounts | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124453) |
 | 12.4.45.2 | 2026-10-10 | KasperCMS 12.4.45.1 | Suggest wizard table permissions, absolute path handling | See [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124452) |
 | 12.4.45.1 | 2026-10-10 | TYPO3 CMS 12.4.45 | 11 TYPO3 core CVEs, library updates | First KasperCMS release, see [coverage matrix](ULTS-PROCESS.md#coverage-matrix-124451) |
 | 12.4.45 | 2026-04-14 | – | – | Last official community release of TYPO3 CMS 12.4 (upstream base) |
 
-The next release in development is **12.4.45.5** (`12.4.45.5-dev`).
+The next release in development is **12.4.45.6** (`12.4.45.6-dev`).
 
 ### Versioning
 
