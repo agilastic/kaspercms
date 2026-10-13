@@ -541,6 +541,7 @@ advisories and the TYPO3 git history on 2026-10-10.
 | CVE-2026-15305 | TYPO3-CORE-SA-2026-020 | v14.2+ only |
 | CVE-2026-19418 | TYPO3-CORE-SA-2026-021 | v13+ only |
 | CVE-2026-85400 | TYPO3-CORE-SA-2026-023 | v14.2+ only |
+| CVE-2026-109162 | TYPO3-CORE-SA-2026-024 | v14 only. Regression of the v14 refactoring `cacb1b497ba`; 12.4 resolves `saveToFileMount` in `afterBuildingFinished()` after the element properties are applied and throws if the folder does not exist (verified by functional test). |
 | CVE-2026-6553 | – | v14.2 only |
 | GHSA-rh54-vffm-5fvp | – | CKEditor ≥ 45 only (`es-toolkit`), 12.4 bundles v44.1.0 |
 
