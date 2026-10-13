@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   check:
@@ -31,27 +30,58 @@ jobs:
           echo "status=$?" >> "$GITHUB_OUTPUT"
           cat report.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Create or update issue
+      # Mails go out only when the report differs from the previous run.
+      # The last report is kept in the Actions cache (a new entry per run).
+      - name: Restore previous report
+        if: steps.check.outputs.status != '2'
+        uses: actions/cache/restore@v4
+        with:
+          path: previous-report
+          key: ults-bugfixes-report-${{ github.run_id }}
+          restore-keys: ults-bugfixes-report-
+
+      - name: Compare with previous report
+        id: compare
         if: steps.check.outputs.status == '1'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          gh label create ults-bugfixes --color 0E8A16 \
-            --description "Upstream bug fixes to triage for backporting" 2>/dev/null || true
-          number=$(gh issue list --label ults-bugfixes --state open --json number --jq '.[0].number // empty')
-          if [ -n "$number" ]; then
-            # only comment when the candidates changed since the last report
-            gh issue view "$number" --json body,comments \
-              --jq '(.comments | last | .body) // .body' > previous.md
-            if diff -q <(grep -v '^Date: ' previous.md) <(grep -v '^Date: ' report.md) > /dev/null; then
-              echo "Candidates unchanged, issue #$number not updated."
-            else
-              gh issue comment "$number" --body-file report.md
-            fi
+          if [ -f previous-report/report.md ] \
+            && diff -q <(grep -v '^Date: ' previous-report/report.md) <(grep -v '^Date: ' report.md) > /dev/null; then
+            echo "Candidates unchanged, no mail sent."
+            echo "changed=0" >> "$GITHUB_OUTPUT"
           else
-            gh issue create --title "ULTS bug fix check: upstream bug fixes to triage" \
-              --label ults-bugfixes --body-file report.md
+            echo "changed=1" >> "$GITHUB_OUTPUT"
           fi
+
+      # Requires the repository secrets SMTP_SERVER, SMTP_PORT, SMTP_USERNAME,
+      # SMTP_PASSWORD and ULTS_MAIL_TO. GitHub issues are not used: gh resolves
+      # the "upstream" remote (TYPO3/typo3) before "origin".
+      - name: Send report by mail
+        if: steps.compare.outputs.changed == '1'
+        uses: dawidd6/action-send-mail@v22
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          secure: ${{ secrets.SMTP_PORT == '465' }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: KasperCMS ULTS check <${{ secrets.SMTP_USERNAME }}>
+          to: ${{ secrets.ULTS_MAIL_TO }}
+          subject: "[KasperCMS] ULTS bug fix check: upstream bug fixes to triage"
+          body: file://report.md
+          convert_markdown: true
+
+      - name: Store report for the next run
+        if: steps.check.outputs.status != '2'
+        run: |
+          mkdir -p previous-report
+          cp report.md previous-report/report.md
+
+      - name: Save report
+        if: steps.check.outputs.status != '2'
+        uses: actions/cache/save@v4
+        with:
+          path: previous-report
+          key: ults-bugfixes-report-${{ github.run_id }}
 
       - name: Fail if the check could not be completed
         if: steps.check.outputs.status == '2'
