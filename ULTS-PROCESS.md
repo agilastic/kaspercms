@@ -240,8 +240,10 @@ php Build/Scripts/ultsSecurityCheck.php --fetch --with-tests  # plus unit tests,
 
 Exit code `0` means no open items, `1` open items, `2` a check could not be
 completed. The workflow `.github/workflows/ults-security-check.yml` runs the
-check every day at 04:00 UTC and creates an issue labelled `ults-check` when
-open items are found, or comments on it when the findings change. Triage (step 2) and backports stay manual.
+check every day at 04:00 UTC and mails the report when open items are found
+and the findings changed since the previous run (SMTP settings and recipient
+in the repository secrets `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USERNAME`,
+`SMTP_PASSWORD` and `ULTS_MAIL_TO`). Triage (step 2) and backports stay manual.
 
 The bug fix check (`--checks=bugfixes`) is not part of the daily security
 check, so that bug fix candidates never hide security findings. See
@@ -287,7 +289,8 @@ cherry-picked (detected by the subject or the `cherry picked from commit`
 line) or when its commit hash is listed in the table below with a reason.
 
 The workflow `.github/workflows/ults-bugfix-check.yml` runs this check every
-Monday at 05:00 UTC and keeps an issue labelled `ults-bugfixes` up to date.
+day at 05:00 UTC and mails the report in the same way when the candidates
+changed.
 
 Backported bug fixes are listed in the coverage matrix of the release that
 contains them.
