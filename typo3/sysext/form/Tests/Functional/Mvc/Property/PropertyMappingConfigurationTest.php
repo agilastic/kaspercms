@@ -19,9 +19,6 @@ namespace TYPO3\CMS\Form\Tests\Functional\Mvc\Property;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
-use TYPO3\CMS\Core\Http\ServerRequest;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface as ExtbaseConfigurationManagerInterface;
 use TYPO3\CMS\Form\Domain\Factory\ArrayFormFactory;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
 use TYPO3\CMS\Form\Mvc\Property\TypeConverter\UploadedFileReferenceConverter;
@@ -40,13 +37,6 @@ final class PropertyMappingConfigurationTest extends FunctionalTestCase
         '/fileadmin/custom_uploads',
         '/fileadmin/form_definitions',
     ];
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $request = (new ServerRequest())->withAttribute('applicationType', SystemEnvironmentBuilder::REQUESTTYPE_BE);
-        $this->get(ExtbaseConfigurationManagerInterface::class)->setRequest($request);
-    }
 
     public static function uploadElementTypesDataProvider(): array
     {
@@ -112,6 +102,6 @@ final class PropertyMappingConfigurationTest extends FunctionalTestCase
     {
         return $formDefinition->getProcessingRule('file-1')
             ->getPropertyMappingConfiguration()
-            ->getConfigurationValue(UploadedFileReferenceConverter::class, UploadedFileReferenceConverter::CONFIGURATION_UPLOAD_FOLDER);
+            ->getConfigurationValue(UploadedFileReferenceConverter::class, (string)UploadedFileReferenceConverter::CONFIGURATION_UPLOAD_FOLDER);
     }
 }
