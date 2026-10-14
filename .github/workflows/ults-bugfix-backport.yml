@@ -1,0 +1,204 @@
+name: ULTS bug fix backport
+
+# Cherry-picks upstream [BUGFIX] commits that apply cleanly to 12.4-ults,
+# runs the CI checks on the result and opens one pull request per commit
+# (a draft when a check failed). Merging stays a manual decision.
+#
+# Pull requests opened with the GITHUB_TOKEN do not trigger the CI workflow,
+# so the checks run here and their results are part of the pull request.
+
+on:
+  schedule:
+    # every day, 05:30 UTC (07:30 CEST), after the bug fix check
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+    inputs:
+      commits:
+        description: 'Upstream commit hashes to backport (space separated); empty = all clean candidates'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ults-bugfix-backport
+  cancel-in-progress: false
+
+env:
+  CI: 'true'
+  # Upper limit of pull requests opened per run
+  MAX_CANDIDATES: 5
+
+jobs:
+  candidates:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      commits: ${{ steps.select.outputs.commits }}
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Add TYPO3 upstream remote
+        run: git remote add upstream https://github.com/TYPO3/typo3.git
+
+      - name: Select candidates
+        id: select
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # gh would otherwise resolve the "upstream" remote (TYPO3/typo3)
+          GH_REPO: ${{ github.repository }}
+          INPUT_COMMITS: ${{ inputs.commits }}
+        run: |
+          set +e
+          if [ -n "$INPUT_COMMITS" ]; then
+            git fetch --quiet upstream 13.4
+            candidates="$INPUT_COMMITS"
+          else
+            php Build/Scripts/ultsSecurityCheck.php --checks=bugfixes --fetch > report.md
+            if [ $? -eq 2 ]; then
+              cat report.md
+              exit 1
+            fi
+            # rows of the bug fix table whose last column is "yes" (applies cleanly)
+            candidates=$(grep -E '^\| [0-9a-f]{11} \|' report.md | grep -E '\| yes \|$' | awk -F'|' '{gsub(/ /, "", $2); print $2}')
+          fi
+          selected=()
+          for commit in $candidates; do
+            sha=$(git rev-parse --verify --quiet "$commit^{commit}")
+            if [ -z "$sha" ]; then
+              echo "::warning::Unknown upstream commit $commit"
+              continue
+            fi
+            short=${sha:0:11}
+            existing=$(gh pr list --state all --head "backport/$short" --json number --jq 'length')
+            if [ "$existing" != "0" ]; then
+              echo "backport/$short already has a pull request, skipped."
+              continue
+            fi
+            selected+=("$short")
+            if [ ${#selected[@]} -ge "$MAX_CANDIDATES" ]; then
+              break
+            fi
+          done
+          json=$(printf '%s\n' "${selected[@]}" | jq -R . | jq -cs 'map(select(. != ""))')
+          echo "Selected: $json"
+          echo "commits=$json" >> "$GITHUB_OUTPUT"
+
+  backport:
+    needs: candidates
+    if: needs.candidates.outputs.commits != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        commit: ${{ fromJSON(needs.candidates.outputs.commits) }}
+    steps:
+      # No persisted credentials: the cherry-picked code runs in the checks
+      # below and must not be able to push.
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Cherry-pick upstream commit
+        id: pick
+        run: |
+          git remote add upstream https://github.com/TYPO3/typo3.git
+          git fetch --quiet upstream 13.4
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          sha=$(git rev-parse "${{ matrix.commit }}^{commit}")
+          git switch -c "backport/${{ matrix.commit }}"
+          if git cherry-pick -x "$sha"; then
+            echo "picked=1" >> "$GITHUB_OUTPUT"
+          else
+            git cherry-pick --abort
+            echo "::warning::${{ matrix.commit }} does not apply cleanly, no pull request opened."
+            echo "picked=0" >> "$GITHUB_OUTPUT"
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Run CI checks
+        id: checks
+        if: steps.pick.outputs.picked == '1'
+        run: |
+          set +e
+          ok=1
+          : > checks.md
+          run_check() {
+            local name="$1"; shift
+            echo "::group::$name"
+            Build/Scripts/runTests.sh -b docker "$@" > "check.log" 2>&1
+            local status=$?
+            cat check.log
+            echo "::endgroup::"
+            if [ $status -eq 0 ]; then
+              echo "| $name | ✅ passed |" >> checks.md
+            else
+              ok=0
+              echo "| $name | ❌ failed |" >> checks.md
+              { echo; echo "<details><summary>$name output (last 60 lines)</summary>"; echo; echo '```'; tail -n 60 check.log; echo '```'; echo "</details>"; } >> failures.md
+            fi
+          }
+          run_check "Composer install" -p 8.1 -s composer -- install --no-progress
+          run_check "CGL" -p 8.1 -s cgl -n
+          run_check "PHPStan" -p 8.1 -s phpstan
+          run_check "Exception codes" -s checkExceptionCodes
+          run_check "Unit tests (PHP 8.1)" -p 8.1 -s unit
+          run_check "Functional tests (SQLite)" -p 8.1 -s functional -d sqlite
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        if: steps.pick.outputs.picked == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SHA: ${{ steps.pick.outputs.sha }}
+          OK: ${{ steps.checks.outputs.ok }}
+        run: |
+          branch="backport/${{ matrix.commit }}"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git" "$branch"
+          subject=$(git log -1 --format=%s "$SHA")
+          resolves=$(git log -1 --format='%(trailers:key=Resolves,valueonly,separator=%x2C )' "$SHA")
+          {
+            echo "Automated backport of upstream \`${SHA:0:11}\` from TYPO3 13.4 ([commit](https://github.com/TYPO3/typo3/commit/$SHA))."
+            for issue in $(echo "$resolves" | grep -oE '[0-9]+'); do
+              echo "Forge: https://forge.typo3.org/issues/$issue"
+            done
+            echo
+            echo "## Checks"
+            echo
+            echo "| Check | Result |"
+            echo "|---|---|"
+            cat checks.md
+            [ -f failures.md ] && cat failures.md
+            echo
+            echo "## Before merging"
+            echo
+            echo "- Review the change for v12 compatibility (APIs, behaviour, PHP 8.1)."
+            echo "- Merge with **Rebase and merge** so the \`cherry picked from\` line stays."
+            echo "- Not suitable: close this pull request and list \`${SHA:0:11}\` with a reason in ULTS-PROCESS.md (\"Upstream bug fixes not backported\")."
+          } > body.md
+          gh label create ults-backport --color 1D76DB \
+            --description "Automated backport of an upstream bug fix" 2>/dev/null || true
+          draft=()
+          if [ "$OK" != "1" ]; then
+            draft=(--draft)
+          fi
+          gh pr create --base 12.4-ults --head "$branch" --title "$subject" \
+            --label ults-backport --body-file body.md "${draft[@]}"
