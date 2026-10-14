@@ -57,6 +57,7 @@ if (PHP_SAPI !== 'cli') {
  *   --checks=advisories,upstream,dependencies,php,rss
  *   --php-versions=8.1,8.2,8.3,8.4,8.5
  *   --bugfix-branch=13.4       upstream branch checked for bug fixes
+ *   --bugfix-since=2026-01-01  ignore upstream bug fixes before this date
  *   --fetch                    fetch the upstream branches first
  *   --with-tests               additionally run unit tests, PHPStan and CGL
  */
@@ -71,6 +72,7 @@ final class UltsSecurityCheck
         'checks' => 'advisories,upstream,dependencies,php,rss',
         'php-versions' => '8.1,8.2,8.3,8.4,8.5',
         'bugfix-branch' => '13.4',
+        'bugfix-since' => '2026-01-01',
     ];
 
     private string $rootPath;
@@ -298,11 +300,21 @@ final class UltsSecurityCheck
             return;
         }
         [$ownSubjects, $ownCherryPicks] = $ownCommits;
+        // Bug fixes TYPO3 itself backported to 12.4 before the base release
+        $baseLog = $this->exec(sprintf(
+            'git log %s --since=%s --format=%s',
+            escapeshellarg($this->options['base-ref']),
+            escapeshellarg($this->options['bugfix-since']),
+            escapeshellarg('%s')
+        ));
+        foreach (array_filter(explode("\n", $baseLog), 'trim') as $subject) {
+            $ownSubjects[trim($subject)] = true;
+        }
 
         $log = $this->exec(sprintf(
             'git log %s --since=%s --reverse --grep=%s --format=%s',
             escapeshellarg($ref),
-            escapeshellarg($this->options['since']),
+            escapeshellarg($this->options['bugfix-since']),
             escapeshellarg('^\[BUGFIX\]'),
             escapeshellarg('%H%x1f%ad%x1f%s%x1f%(trailers:key=Resolves,valueonly,separator=%x2C)%x1e') . ' --date=short'
         ), $exitCode);
@@ -339,7 +351,7 @@ final class UltsSecurityCheck
         $this->report[] = sprintf(
             '%d upstream bug fixes since %s checked: %d backported, %d documented as not backported, %d to triage.',
             $checked,
-            $this->options['since'],
+            $this->options['bugfix-since'],
             $backported,
             $documented,
             count($rows)

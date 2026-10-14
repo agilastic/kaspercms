@@ -261,8 +261,9 @@ run it with `--bugfix-branch=14.3` for 14.x.
 
 An upstream `[BUGFIX]` commit is backported when all of the following apply:
 
-- It was merged after the base release 12.4.45 (2026-04-14) and is not part
-  of 12.4 yet.
+- It was merged in 2026 or later (`--bugfix-since=2026-01-01`) and is not
+  part of 12.4 yet. Fixes that TYPO3 itself backported to 12.4 before the
+  base release 12.4.45 are recognised by their subject.
 - The affected code exists in 12.4, and the bug can occur in 12.4.
 - It does not add features, change public APIs or behaviour that
   installations rely on, change the database schema, require configuration
