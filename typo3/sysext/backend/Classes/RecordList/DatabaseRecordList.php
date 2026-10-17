@@ -1797,7 +1797,7 @@ class DatabaseRecordList
                     if ($action === $this->spaceIcon) {
                         continue;
                     }
-                    // This is a backwards-compat layer for the existing hook items, which will be removed in TYPO3 v12.
+                    // This is a backwards-compat layer for the existing hook items, kept in TYPO3 12.4.
                     $action = str_replace('btn btn-default', 'dropdown-item dropdown-item-spaced', $action);
                     $title = [];
                     preg_match('/title="([^"]*)"/', $action, $title);

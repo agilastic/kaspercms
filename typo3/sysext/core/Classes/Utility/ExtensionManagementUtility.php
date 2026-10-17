@@ -100,8 +100,8 @@ class ExtensionManagementUtility
      * Temporary helper method to resolve paths with the PackageManager.
      *
      * The PackageManager is statically injected to this class already. This
-     * method will be removed without substitution in TYPO3 12 once a proper
-     * resource API is introduced.
+     * method is meant to be removed without substitution once a proper
+     * resource API is introduced; it still exists in TYPO3 12.4.
      *
      * @throws PackageException
      * @internal This method is only allowed to be called from GeneralUtility::getFileAbsFileName()! DONT'T introduce other usages!

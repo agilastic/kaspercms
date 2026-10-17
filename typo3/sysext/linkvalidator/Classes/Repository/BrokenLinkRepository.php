@@ -310,7 +310,7 @@ class BrokenLinkRepository
                 ->fetchAllAssociative();
             foreach ($records as &$record) {
                 $response = json_decode($record['url_response'], true);
-                // Fallback mechanism to still support the old serialized data, could be removed in TYPO3 v12 or later
+                // Fallback mechanism to still support the old serialized data (objects are not allowed), kept in TYPO3 12.4
                 if ($response === null) {
                     $response = unserialize($record['url_response'], ['allowed_classes' => false]);
                 }
