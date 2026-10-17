@@ -376,16 +376,29 @@ every release:
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
-## Coverage matrix: 12.4.45.7 (in development)
+## Coverage matrix: 12.4.45.7
 
-Changes on `12.4-ults` since 12.4.45.6. This section is completed when
-12.4.45.7 is released.
+KasperCMS 12.4.45.7, released 2026-10-17. Checked against the GitHub
+advisories, the TYPO3 security feed, `composer audit` and the TYPO3 git
+history on 2026-10-17 (automated ULTS security check): no new advisories
+affecting 12.4 were published since 12.4.45.6. This release contains no
+security fixes.
+
+Verification: CGL, PHPStan (PHP 8.1, 8.3 and 8.5), the integrity checks of
+step 6, unit tests and functional tests (SQLite) on PHP 8.1, 8.3 and 8.5.
 
 ### Hardening
 
 | Fix on `12.4-ults` | Type | Reference |
 |---|---|---|
 | Respect page permissions in the indexing module (`indexed_search`) | Hardening: the statistic, page, document and word views and the removal of index entries only cover pages the backend user may read (admins are not restricted). Before, users with access to the module could see the indexed words and titles of any page and remove its index entries. The TYPO3 Security Team does not consider this a security issue. | Fixed in KasperCMS |
+
+### Other changes
+
+| Change on `12.4-ults` | Notes |
+|---|---|
+| Comments announcing removals in past TYPO3 versions | Corrected: the backwards compatibility layers stay in 12.4; no code changes |
+| CI | Unit and functional tests on PHP 8.1, 8.3 and 8.5 |
 
 ## Coverage matrix: 12.4.45.6
 
