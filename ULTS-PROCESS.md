@@ -374,6 +374,17 @@ every release:
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
+## Coverage matrix: 12.4.45.7 (in development)
+
+Changes on `12.4-ults` since 12.4.45.6. This section is completed when
+12.4.45.7 is released.
+
+### Hardening
+
+| Fix on `12.4-ults` | Type | Reference |
+|---|---|---|
+| Respect page permissions in the indexing module (`indexed_search`) | Hardening: the statistic, page, document and word views and the removal of index entries only cover pages the backend user may read (admins are not restricted). Before, users with access to the module could see the indexed words and titles of any page and remove its index entries. The TYPO3 Security Team does not consider this a security issue. | Fixed in KasperCMS |
+
 ## Coverage matrix: 12.4.45.6
 
 KasperCMS 12.4.45.6, released 2026-10-17. Checked against the GitHub

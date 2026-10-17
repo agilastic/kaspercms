@@ -1,0 +1,37 @@
+"pages",,,,,,,,,
+,"uid","pid","title","deleted","perms_userid","perms_groupid","perms_user","perms_group","perms_everybody"
+,1,0,"Root",0,1,10,31,31,1
+,2,1,"Restricted page",0,1,0,31,0,0
+,3,1,"Allowed page",0,1,10,31,1,0
+,4,1,"Allowed documents",0,1,10,31,1,0
+,5,1,"Restricted documents",0,1,0,31,0,0
+"be_groups",,,,,,,,,
+,"uid","pid","title","db_mountpoints","groupMods","tables_select","deleted",,
+,10,0,"Editors",1,"web_IndexedSearchIsearch","pages",0,,
+"be_users",,,,,,,,,
+,"uid","pid","username","usergroup","admin","deleted","options",,
+,1,0,"admin",,1,0,3,,
+,10,0,"editor",10,0,0,3,,
+"index_phash",,,,,,,,,
+,"phash","phash_grouping","data_filename","data_page_id","gr_list","item_type","item_title","item_size","item_description"
+,1002,1002,"",2,"0,-1","0","Restricted page title",10,""
+,1003,1003,"",3,"0,-1","0","Allowed page title",10,""
+,1004,1004,"fileadmin/restricted-document.pdf",5,"0,-1","2","Restricted document title",10,""
+,1005,1005,"fileadmin/allowed-document.pdf",4,"0,-1","2","Allowed document title",10,""
+"index_section",,,,,,,,,
+,"phash","rl0","rl1","page_id",,,,,
+,1002,1,2,2,,,,,
+,1003,1,3,3,,,,,
+,1004,1,5,5,,,,,
+,1005,1,4,4,,,,,
+"index_words",,,,,,,,,
+,"wid","baseword","metaphone","is_stopword",,,,,
+,501,"restrictedword",1,0,,,,,
+,502,"allowedword",2,0,,,,,
+,503,"sharedword",3,0,,,,,
+"index_rel",,,,,,,,,
+,"phash","wid","count","first","freq","flags",,,
+,1002,501,1,0,1,0,,,
+,1002,503,1,0,1,0,,,
+,1003,502,1,0,1,0,,,
+,1003,503,1,0,1,0,,,

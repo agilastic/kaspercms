@@ -49,6 +49,10 @@ class AdministrationController extends ActionController
 
     protected int $pageUid = 0;
     protected array $indexerConfig = [];
+    /**
+     * @var array<int, bool>
+     */
+    protected array $pageAccess = [];
 
     public function __construct(
         protected readonly ModuleTemplateFactory $moduleTemplateFactory,
@@ -201,7 +205,7 @@ class AdministrationController extends ActionController
         $view = $this->initializeModuleTemplate($this->request);
         $view->assignMultiple([
             'extensionConfiguration' => $this->indexerConfig,
-            'records' => $this->administrationRepository->getPageStatistic(),
+            'records' => $this->filterAccessibleRows($this->administrationRepository->getPageStatistic()),
         ]);
         return $view->renderResponse('Administration/Pages');
     }
@@ -214,7 +218,7 @@ class AdministrationController extends ActionController
         $view = $this->initializeModuleTemplate($this->request);
         $view->assignMultiple([
             'extensionConfiguration' => $this->indexerConfig,
-            'records' => $this->administrationRepository->getExternalDocumentsStatistic(),
+            'records' => $this->filterAccessibleRows($this->administrationRepository->getExternalDocumentsStatistic()),
         ]);
         return $view->renderResponse('Administration/ExternalDocuments');
     }
@@ -251,7 +255,7 @@ class AdministrationController extends ActionController
             ->executeQuery()
             ->fetchAssociative();
 
-        if (!is_array($pageHashRow)) {
+        if (!is_array($pageHashRow) || !$this->isPageAccessible((int)$pageHashRow['data_page_id'])) {
             return $this->redirect('statistic');
         }
 
@@ -458,6 +462,7 @@ class AdministrationController extends ActionController
             ->orderBy('index_rel.freq', 'desc')
             ->executeQuery()
             ->fetchAllAssociative();
+        $rows = $this->filterAccessibleRows($rows);
 
         $view = $this->initializeModuleTemplate($this->request);
         $view->assignMultiple([
@@ -485,7 +490,9 @@ class AdministrationController extends ActionController
             }
         }
         $this->administrationRepository->external_parsers = $externalParsers;
-        $allLines = $this->administrationRepository->getTree($this->pageUid, $depth, $mode);
+        $allLines = $this->isPageAccessible($this->pageUid)
+            ? $this->administrationRepository->getTree($this->pageUid, $depth, $mode)
+            : [];
         $view = $this->initializeModuleTemplate($this->request);
         $view->assignMultiple([
             'extensionConfiguration' => $this->indexerConfig,
@@ -512,8 +519,67 @@ class AdministrationController extends ActionController
      */
     protected function deleteIndexedItemAction($itemId, $depth = 1, $mode = 'overview'): ResponseInterface
     {
-        $this->administrationRepository->removeIndexedPhashRow($itemId, $this->pageUid, $depth);
+        $itemId = $this->filterAccessibleItems((string)$itemId);
+        if ($itemId !== '') {
+            $this->administrationRepository->removeIndexedPhashRow($itemId, $this->pageUid, $depth);
+        }
         return $this->redirect('statistic', null, null, ['depth' => $depth, 'mode' => $mode]);
+    }
+
+    /**
+     * KasperCMS: index data is only shown and removed for pages the backend
+     * user may read (admins: all pages).
+     */
+    protected function isPageAccessible(int $pageId): bool
+    {
+        $backendUser = $this->getBackendUserAuthentication();
+        if ($backendUser->isAdmin()) {
+            return true;
+        }
+        if ($pageId <= 0) {
+            return false;
+        }
+        return $this->pageAccess[$pageId] ??= BackendUtility::readPageAccess($pageId, $backendUser->getPagePermsClause(Permission::PAGE_SHOW)) !== false;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $rows Rows with a "data_page_id" field
+     * @return list<array<string, mixed>>
+     */
+    protected function filterAccessibleRows(array $rows): array
+    {
+        return array_values(array_filter(
+            $rows,
+            fn(array $row): bool => $this->isPageAccessible((int)($row['data_page_id'] ?? 0))
+        ));
+    }
+
+    /**
+     * Reduces "ALL" or a comma-separated list of page hashes to the items of
+     * accessible pages. Returns an empty string if nothing may be removed.
+     */
+    protected function filterAccessibleItems(string $itemId): string
+    {
+        if ($itemId === 'ALL') {
+            return $this->isPageAccessible($this->pageUid) ? $itemId : '';
+        }
+        $pageHashes = array_filter(array_map('intval', GeneralUtility::trimExplode(',', $itemId, true)));
+        if ($pageHashes === [] || $this->getBackendUserAuthentication()->isAdmin()) {
+            return implode(',', $pageHashes);
+        }
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('index_phash');
+        $rows = $queryBuilder
+            ->select('phash', 'data_page_id')
+            ->from('index_phash')
+            ->where(
+                $queryBuilder->expr()->in(
+                    'phash',
+                    $queryBuilder->createNamedParameter($pageHashes, Connection::PARAM_INT_ARRAY)
+                )
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+        return implode(',', array_column($this->filterAccessibleRows($rows), 'phash'));
     }
 
     protected function getBackendUserAuthentication(): BackendUserAuthentication
