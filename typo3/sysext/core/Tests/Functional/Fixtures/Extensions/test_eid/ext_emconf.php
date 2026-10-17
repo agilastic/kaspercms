@@ -6,14 +6,14 @@ $EM_CONF[$_EXTKEY] = [
     'title' => 'Frontend eid responder',
     'description' => 'Frontend eid responder',
     'category' => 'example',
-    'version' => '12.4.45.6',
+    'version' => '12.4.45.7',
     'state' => 'beta',
     'author' => 'Stefan Bürk',
     'author_email' => 'stefan@buerk.tech',
     'author_company' => '',
     'constraints' => [
         'depends' => [
-            'typo3' => '12.4.45.6',
+            'typo3' => '12.4.45.7',
         ],
         'conflicts' => [],
         'suggests' => [],
