@@ -308,15 +308,18 @@ contains them.
 
 ### Upstream bug fixes not backported
 
-Triage of the candidates since 2026-04-14 is in progress: candidates that
-apply cleanly are done, candidates with conflicts are pending. Decisions are
-added here, so that the bug fix check does not report them again.
+Triage of the candidates since 2026-01-01 is in progress: candidates that
+apply cleanly are handled by the backport workflow, candidates with conflicts
+are pending. Decisions are added here, so that the bug fix check does not
+report them again.
 
 | Commit (13.4) | Subject | Reason |
 |---|---|---|
 | `1acb4681598` | Handle multibyte characters in TypoScript | Changes the TypoScript parsing result of existing installations: lines with multibyte identifiers, ignored so far, would become active |
 | `2c703f5aaec` | Evaluate sortDesc parameter correctly in indexed_search | Reverses the order of search results of existing installations |
 | `9e3ace89048` | Remove garbage collected rows in batches | Deferred: needs an adaptation to Doctrine DBAL 3 (`Table::getPrimaryKeyConstraint()` is DBAL 4) and to the 12.4 table configuration |
+| `e2f9e9950d8` | Use sprite references in SvgSpriteIconProvider inline output | Changes the inline output of the core icons from standalone SVG markup to sprite references (`<use>`), which changes the DOM existing styles and scripts rely on; an optimisation rather than a bug fix |
+| `9f943cfa338` | Skip transient properties in Extbase validation | Stops the automatic recursive validation of transient child models that have public getters, so objects rejected so far would be accepted |
 
 ## 8. Release
 
