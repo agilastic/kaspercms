@@ -27,7 +27,9 @@ if (PHP_SAPI !== 'cli') {
  * KasperCMS releases:
  *
  * - one zip archive per release tag and system extension, created with
- *   `git archive` from the tag (reproducible: fixed mtime of the tag commit),
+ *   `git archive` from the tag (reproducible: fixed mtime of the tag commit,
+ *   UTC; the bytes may still change with the git or zlib version, so archives
+ *   already attached to a release take precedence, see --skip-archives),
  * - a `packages.json` that lists every version with its dist URL and SHA-1.
  *
  * The archives are meant to be attached to the GitHub release of the tag, the
@@ -56,6 +58,9 @@ final class ComposerRepositoryBuilder
 
     public function __construct(array $argv)
     {
+        // Zip archives store file times in local time: build them in UTC, so
+        // the archives (and their checksums) do not depend on the time zone.
+        putenv('TZ=UTC');
         $this->rootPath = dirname(__DIR__, 2);
         $this->options = $this->parseOptions($argv);
     }

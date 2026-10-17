@@ -60,6 +60,10 @@ jobs:
       - name: Build archives and packages.json
         run: php Build/Scripts/buildComposerRepository.php --output=.cache/composer-repository
 
+      # Archives already attached to a release are never replaced: they are
+      # downloaded over the freshly built ones, and packages.json is written
+      # again from the files that are actually published. A rebuilt archive
+      # can differ byte by byte (other git or zlib version on the runner).
       - name: Attach missing archives to the releases
         run: |
           cd .cache/composer-repository
@@ -72,16 +76,26 @@ jobs:
             fi
             existing=$(gh release view "$tag" --json assets --jq '.assets[].name')
             missing=()
+            present=0
             for file in *-"$version".zip; do
-              grep -qxF "$file" <<< "$existing" || missing+=("$file")
+              if grep -qxF "$file" <<< "$existing"; then
+                present=$((present + 1))
+              else
+                missing+=("$file")
+              fi
             done
+            if [ "$present" -gt 0 ]; then
+              echo "$tag: using $present attached archive(s)"
+              gh release download "$tag" --pattern "*-$version.zip" --clobber
+            fi
             if [ ${#missing[@]} -gt 0 ]; then
               echo "$tag: uploading ${#missing[@]} archive(s)"
               gh release upload "$tag" "${missing[@]}"
-            else
-              echo "$tag: all archives present"
             fi
           done
+
+      - name: Write packages.json from the published archives
+        run: php Build/Scripts/buildComposerRepository.php --output=.cache/composer-repository --skip-archives
 
       - name: Verify the uploaded archives
         run: |
