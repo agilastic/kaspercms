@@ -374,24 +374,61 @@ every release:
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
-## Coverage matrix: 12.4.45.6 (in development)
+## Coverage matrix: 12.4.45.6
 
-Changes on `12.4-ults` since 12.4.45.5. This section is completed when
-12.4.45.6 is released.
+KasperCMS 12.4.45.6, released 2026-10-17. Checked against the GitHub
+advisories, the TYPO3 security feed and the TYPO3 git history on 2026-10-17
+(automated ULTS security check): no new TYPO3 advisories affecting 12.4 were
+published since 12.4.45.5. `composer audit` reported one library advisory,
+fixed in this release.
+
+Verification: CGL, PHPStan (PHP 8.1 and 8.5), the integrity checks of step 6,
+unit tests and functional tests (SQLite) on PHP 8.1 and PHP 8.5.
+
+### Libraries
+
+| Advisory | Package | Fix on `12.4-ults` |
+|---|---|---|
+| CVE-2026-109449 | symfony/expression-language | Raised to `^6.4.48` (unbounded nesting in the expression parser) |
 
 ### Bug fixes
+
+Upstream bug fixes from `13.4` and 14.x (see [Bug fix backports](#bug-fix-backports)).
+Most of them were proposed by the backport workflow and reviewed for 12.4
+compatibility before merging.
 
 | Fix on `12.4-ults` | Reference |
 |---|---|
 | Set tstamp in DatabaseWriter for sys_log | Forge #109290 |
 | Enforce isEnabled() check in ResetPasswordController | Forge #109942 |
 | Restore FAL permission evaluation | Forge #110687 (adapted to the 12.4 exception handling) |
+| Fix exceptions due to null as array key | Forge #108334 |
+| Add is_siteroot to select fields in record lists | Forge #108617 |
+| Fix undefined array key warning in language menu processing | Forge #108587 |
+| Prevent call to undefined ProcessedFile::setMissing | Forge #108036 |
+| Mark english only content with proper lang attribute | Forge #108914 |
+| Prevent losing PageLinkHandler link when re-linking | Forge #108947 |
+| Fix type error in SelectItem | Forge #108989 |
+| Allow CType menu_categorized in strict mode | Forge #87190 |
+| Fix duplicate cache-control headers | Forge #107891 (`.htaccess` template for new installations) |
+| Prevent open_basedir warnings for file thumbnails | Forge #108774 |
+| Handle missing sys_file_reference in ExtendedFileUtility | Forge #109103 (without the native return type of the protected method) |
+| Handle non-string keys in implodeAttributes | Forge #107188 |
+| Add typecast to value checked in DataHandler | Forge #107702 |
 
 ### Not affected
 
 | CVE | Bulletin | Reason |
 |---|---|---|
 | CVE-2026-109162 | TYPO3-CORE-SA-2026-024 | v14 only (triaged 2026-10-13). Regression of the v14 refactoring `cacb1b497ba`; 12.4 resolves `saveToFileMount` in `afterBuildingFinished()` after the element properties are applied and throws if the folder does not exist (verified by functional test). |
+
+### Other changes
+
+| Change on `12.4-ults` | Notes |
+|---|---|
+| Composer repository | Archives are built in UTC; `packages.json` is written from the archives attached to the releases |
+| Automated workflows | The backport workflow runs the checks without write permissions; the dependency update only changes `composer.lock` |
+| PHPStan | Passes on PHP 8.1 and 8.5 |
 
 ## Coverage matrix: 12.4.45.5
 
