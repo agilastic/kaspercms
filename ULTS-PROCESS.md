@@ -61,7 +61,7 @@ flowchart TD
 | GitHub advisories (libraries) | Advisories of TYPO3-maintained libraries | <https://github.com/TYPO3/html-sanitizer/security/advisories> |
 | Third-party advisories | Bundled or required libraries | [CKEditor 5](https://github.com/ckeditor/ckeditor5/security/advisories), [Symfony](https://github.com/symfony/symfony/security/advisories), [Guzzle](https://github.com/guzzle/guzzle/security/advisories), [PSR-7](https://github.com/guzzle/psr7/security/advisories) |
 | TYPO3 release notes | Which fixes TYPO3 releases contain (commit subjects) | <https://get.typo3.org/> |
-| TYPO3 git repository | The actual fixes, identified by commit trailers | `origin/13.4`, `origin/14.3`, `origin/main` |
+| TYPO3 git repository | The actual fixes, identified by commit trailers | `upstream/13.4`, `upstream/14.3`, `upstream/main` (remote `upstream`) |
 
 Upstream security commits carry machine-readable trailers, which connect all
 sources:
@@ -73,7 +73,8 @@ Security-Bulletin: TYPO3-CORE-SA-2026-009
 Security-References: CVE-2026-47347
 ```
 
-Useful commands:
+Useful commands (the remote `upstream` is
+`https://github.com/TYPO3/typo3.git`; `origin` is the KasperCMS repository):
 
 ```bash
 # GitHub advisories of TYPO3 core since a date, with affected ranges
@@ -84,8 +85,8 @@ gh api 'repos/TYPO3/typo3/security-advisories?per_page=100' --paginate \
         | @tsv'
 
 # All upstream security commits since the last 12.4 base release
-git fetch origin 13.4 14.3 main
-for b in origin/13.4 origin/14.3 origin/main; do
+git fetch upstream 13.4 14.3 main
+for b in upstream/13.4 upstream/14.3 upstream/main; do
   git log "$b" --since=2026-04-14 --format='%h %s' --grep='^\[SECURITY\]'
 done
 ```
@@ -107,8 +108,8 @@ For every CVE / GHSA, check the affected version range of the advisory:
 
 ```bash
 # by CVE or bulletin id
-git log origin/13.4 --format='%h %ad %s' --date=short --grep='CVE-2026-47347'
-git log origin/13.4 --format='%h %ad %s' --date=short --grep='TYPO3-CORE-SA-2026-009'
+git log upstream/13.4 --format='%h %ad %s' --date=short --grep='CVE-2026-47347'
+git log upstream/13.4 --format='%h %ad %s' --date=short --grep='TYPO3-CORE-SA-2026-009'
 ```
 
 The `13.4` branch is the closest code base to 12.4 and is the preferred
@@ -202,7 +203,7 @@ flowchart LR
 ```bash
 # Upstream security commits without a counterpart on our branch
 git log 31f881a2129..12.4-ults --format='%s' > ours.txt
-for b in origin/13.4 origin/14.3 origin/main; do
+for b in upstream/13.4 upstream/14.3 upstream/main; do
   git log "$b" --since=2026-04-14 --format='%s' --grep='^\[SECURITY\]'
 done | sort -u | while read -r s; do
   grep -qxF "$s" ours.txt && echo "OURS     $s" || echo "MISSING  $s"
@@ -369,6 +370,25 @@ every release:
   [README](README.md#installation-with-composer).
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
+
+## Coverage matrix: 12.4.45.6 (in development)
+
+Changes on `12.4-ults` since 12.4.45.5. This section is completed when
+12.4.45.6 is released.
+
+### Bug fixes
+
+| Fix on `12.4-ults` | Reference |
+|---|---|
+| Set tstamp in DatabaseWriter for sys_log | Forge #109290 |
+| Enforce isEnabled() check in ResetPasswordController | Forge #109942 |
+| Restore FAL permission evaluation | Forge #110687 (adapted to the 12.4 exception handling) |
+
+### Not affected
+
+| CVE | Bulletin | Reason |
+|---|---|---|
+| CVE-2026-109162 | TYPO3-CORE-SA-2026-024 | v14 only (triaged 2026-10-13). Regression of the v14 refactoring `cacb1b497ba`; 12.4 resolves `saveToFileMount` in `afterBuildingFinished()` after the element properties are applied and throws if the folder does not exist (verified by functional test). |
 
 ## Coverage matrix: 12.4.45.5
 
@@ -554,7 +574,6 @@ advisories and the TYPO3 git history on 2026-10-10.
 | CVE-2026-15305 | TYPO3-CORE-SA-2026-020 | v14.2+ only |
 | CVE-2026-19418 | TYPO3-CORE-SA-2026-021 | v13+ only |
 | CVE-2026-85400 | TYPO3-CORE-SA-2026-023 | v14.2+ only |
-| CVE-2026-109162 | TYPO3-CORE-SA-2026-024 | v14 only. Regression of the v14 refactoring `cacb1b497ba`; 12.4 resolves `saveToFileMount` in `afterBuildingFinished()` after the element properties are applied and throws if the folder does not exist (verified by functional test). |
 | CVE-2026-6553 | – | v14.2 only |
 | GHSA-rh54-vffm-5fvp | – | CKEditor ≥ 45 only (`es-toolkit`), 12.4 bundles v44.1.0 |
 
