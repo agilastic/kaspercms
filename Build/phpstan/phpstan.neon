@@ -37,3 +37,14 @@ parameters:
     - ../../typo3/sysext/extbase/Tests/Unit/Reflection/Fixture/DummyController.php
     # contains broken syntax for testing-purpose, which cannot be disabled directly
     - ../../typo3/sysext/extbase/Tests/Unit/Reflection/Fixture/DummyControllerWithIgnoreValidationDoctrineAnnotation.php
+
+  ignoreErrors:
+    # Only reported when PHPStan runs on PHP 8.1 (its str_replace() signature
+    # differs by PHP version). Kept out of the baseline, where an unmatched
+    # entry fails the analysis, so that PHPStan also passes on PHP 8.5.
+    -
+      message: '#^Parameter \#1 \$search of function str_replace expects array\<string\>\|string, array\<int, int\> given\.$#'
+      identifier: argument.type
+      count: 1
+      path: ../../typo3/sysext/core/Classes/Routing/Enhancer/VariableProcessor.php
+      reportUnmatched: false

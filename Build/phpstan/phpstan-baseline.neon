@@ -2041,12 +2041,6 @@ parameters:
 			path: ../../typo3/sysext/core/Classes/Routing/Enhancer/VariableProcessor.php
 
 		-
-			message: '#^Parameter \#1 \$search of function str_replace expects array\<string\>\|string, array\<int, int\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../../typo3/sysext/core/Classes/Routing/Enhancer/VariableProcessor.php
-
-		-
 			message: '#^Method TYPO3\\CMS\\Core\\Routing\\PageArguments\:\:offsetGet\(\) should return array\<string, array\|string\>\|string\|null but returns int\.$#'
 			identifier: return.type
 			count: 1
