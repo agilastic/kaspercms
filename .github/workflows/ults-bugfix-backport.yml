@@ -4,8 +4,13 @@ name: ULTS bug fix backport
 # runs the CI checks on the result and opens one pull request per commit
 # (a draft when a check failed). Merging stays a manual decision.
 #
-# Pull requests opened with the GITHUB_TOKEN do not trigger the CI workflow,
-# so the checks run here and their results are part of the pull request.
+# The checks execute the cherry-picked code, Composer plugins and tests, so
+# they run in a job without write permissions. A separate job pushes the
+# branch and opens the pull request from a fresh checkout.
+#
+# Pull requests opened with the GITHUB_TOKEN need a manual approval before the
+# CI workflow runs on them, so the checks run here and their results are part
+# of the pull request.
 
 on:
   schedule:
@@ -92,22 +97,22 @@ jobs:
           echo "Selected: $json"
           echo "commits=$json" >> "$GITHUB_OUTPUT"
 
+  # Cherry-picks the commit and runs the CI checks. This job has no write
+  # permissions: the cherry-picked code, Composer plugins and tests run here.
+  # The commit is handed over as a git bundle created before any check runs.
   backport:
     needs: candidates
     if: needs.candidates.outputs.commits != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
         commit: ${{ fromJSON(needs.candidates.outputs.commits) }}
     steps:
-      # No persisted credentials: the cherry-picked code runs in the checks
-      # below and must not be able to push.
       - name: Checkout 12.4-ults
         uses: actions/checkout@v4
         with:
@@ -123,23 +128,34 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           sha=$(git rev-parse "${{ matrix.commit }}^{commit}")
+          base=$(git rev-parse HEAD)
           git switch -c "backport/${{ matrix.commit }}"
+          mkdir -p handover
           if git cherry-pick -x "$sha"; then
             echo "picked=1" >> "$GITHUB_OUTPUT"
+            git bundle create handover/backport.bundle "$base..backport/${{ matrix.commit }}"
+            echo "$base" > handover/base
+            echo "$sha" > handover/upstream
           else
             git cherry-pick --abort
             echo "::warning::${{ matrix.commit }} does not apply cleanly, no pull request opened."
             echo "picked=0" >> "$GITHUB_OUTPUT"
           fi
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Hand over the commit
+        if: steps.pick.outputs.picked == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backport-${{ matrix.commit }}
+          path: handover/
+          retention-days: 3
 
       - name: Run CI checks
-        id: checks
         if: steps.pick.outputs.picked == '1'
         run: |
           set +e
-          ok=1
           : > checks.md
+          : > failures.md
           run_check() {
             local name="$1"; shift
             echo "::group::$name"
@@ -150,7 +166,6 @@ jobs:
             if [ $status -eq 0 ]; then
               echo "| $name | ✅ passed |" >> checks.md
             else
-              ok=0
               echo "| $name | ❌ failed |" >> checks.md
               { echo; echo "<details><summary>$name output (last 60 lines)</summary>"; echo; echo '```'; tail -n 60 check.log; echo '```'; echo "</details>"; } >> failures.md
             fi
@@ -161,22 +176,81 @@ jobs:
           run_check "Exception codes" -s checkExceptionCodes
           run_check "Unit tests (PHP 8.1)" -p 8.1 -s unit
           run_check "Functional tests (SQLite)" -p 8.1 -s functional -d sqlite
-          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+          mkdir -p results
+          cp checks.md failures.md results/
+
+      - name: Hand over the check results
+        if: steps.pick.outputs.picked == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: checks-${{ matrix.commit }}
+          path: results/
+          retention-days: 3
+
+  # Pushes the branch and opens the pull request from a fresh checkout. No
+  # code of the backport is executed here.
+  pull-request:
+    needs: [candidates, backport]
+    if: always() && needs.candidates.outputs.commits != '[]' && needs.candidates.outputs.commits != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        commit: ${{ fromJSON(needs.candidates.outputs.commits) }}
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the handed over commit
+        id: handover
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: backport-${{ matrix.commit }}
+          path: handover
+
+      - name: Fetch the check results
+        if: steps.handover.outcome == 'success'
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: checks-${{ matrix.commit }}
+          path: results
 
       - name: Open pull request
-        if: steps.pick.outputs.picked == '1'
+        if: steps.handover.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          SHA: ${{ steps.pick.outputs.sha }}
-          OK: ${{ steps.checks.outputs.ok }}
         run: |
           branch="backport/${{ matrix.commit }}"
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git" "$branch"
-          subject=$(git log -1 --format=%s "$SHA")
-          resolves=$(git log -1 --format='%(trailers:key=Resolves,valueonly,separator=%x2C )' "$SHA")
+          base=$(cat handover/base)
+          sha=$(cat handover/upstream)
+          git fetch --quiet handover/backport.bundle "+refs/heads/$branch:refs/heads/$branch"
+          # Exactly one commit on top of the checked out base, carrying the
+          # expected "cherry picked from" line.
+          if [ "$(git rev-parse "$branch^")" != "$base" ] || [ "$base" != "$(git rev-parse HEAD)" ] \
+            || ! git log -1 --format=%B "$branch" | grep -qxF "(cherry picked from commit $sha)"; then
+            echo "::error::Handed over commit for ${{ matrix.commit }} is not the expected cherry-pick."
+            exit 1
+          fi
+          git -c core.hooksPath=/dev/null push \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git" "$branch"
+          ok=1
+          if [ ! -f results/checks.md ] || [ ! -s results/checks.md ] || grep -q '❌' results/checks.md; then
+            ok=0
+          fi
+          subject=$(git log -1 --format=%s "$branch")
+          resolves=$(git log -1 --format='%(trailers:key=Resolves,valueonly,separator=%x2C )' "$branch")
           {
-            echo "Automated backport of upstream \`${SHA:0:11}\` from TYPO3 13.4 ([commit](https://github.com/TYPO3/typo3/commit/$SHA))."
+            echo "Automated backport of upstream \`${sha:0:11}\` from TYPO3 13.4 ([commit](https://github.com/TYPO3/typo3/commit/$sha))."
             for issue in $(echo "$resolves" | grep -oE '[0-9]+'); do
               echo "Forge: https://forge.typo3.org/issues/$issue"
             done
@@ -185,19 +259,23 @@ jobs:
             echo
             echo "| Check | Result |"
             echo "|---|---|"
-            cat checks.md
-            [ -f failures.md ] && cat failures.md
+            if [ -f results/checks.md ]; then
+              cat results/checks.md
+              cat results/failures.md 2>/dev/null
+            else
+              echo "| All checks | ❌ no results (job failed or was cancelled) |"
+            fi
             echo
             echo "## Before merging"
             echo
             echo "- Review the change for v12 compatibility (APIs, behaviour, PHP 8.1)."
             echo "- Merge with **Rebase and merge** so the \`cherry picked from\` line stays."
-            echo "- Not suitable: close this pull request and list \`${SHA:0:11}\` with a reason in ULTS-PROCESS.md (\"Upstream bug fixes not backported\")."
+            echo "- Not suitable: close this pull request and list \`${sha:0:11}\` with a reason in ULTS-PROCESS.md (\"Upstream bug fixes not backported\")."
           } > body.md
           gh label create ults-backport --color 1D76DB \
             --description "Automated backport of an upstream bug fix" 2>/dev/null || true
           draft=()
-          if [ "$OK" != "1" ]; then
+          if [ "$ok" != "1" ]; then
             draft=(--draft)
           fi
           gh pr create --base 12.4-ults --head "$branch" --title "$subject" \

@@ -22,9 +22,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 12.4-ults
+          # The token is only passed to the push below, never stored in .git/config
+          persist-credentials: false
 
+      # Only composer.lock is updated: no package is installed, so no plugin
+      # or script of a dependency runs while this job has write permissions.
       - name: Update locked dependencies to their latest patch versions
-        run: Build/Scripts/runTests.sh -b docker -p 8.1 -s composer -- update --patch-only --no-progress
+        run: Build/Scripts/runTests.sh -b docker -p 8.1 -s composer -- update --patch-only --no-install --no-plugins --no-scripts --no-progress
 
       - name: Summarize changes
         id: changes
@@ -67,14 +71,15 @@ jobs:
             echo
             echo "Executed commands:"
             echo
-            echo "  composer update --patch-only"
+            echo "  composer update --patch-only --no-install --no-plugins --no-scripts"
             echo
             cat changes.md
             echo
             echo "Releases: 12.4"
           } > commit-message.txt
           git commit -q -F commit-message.txt
-          git push --force origin "$branch"
+          git -c core.hooksPath=/dev/null push --force \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$branch"
           {
             echo "Monthly update of locked dependencies to their latest **patch** versions"
             echo "(\`composer update --patch-only\`, composer.json constraints unchanged)."
