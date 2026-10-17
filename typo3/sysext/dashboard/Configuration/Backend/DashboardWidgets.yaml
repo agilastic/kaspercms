@@ -34,13 +34,6 @@ services:
       $link: 'https://typo3.org/help/security-advisories'
       $target: '_blank'
 
-  dashboard.buttons.docGettingStarted:
-    class: 'TYPO3\CMS\Dashboard\Widgets\Provider\ButtonProvider'
-    arguments:
-      $title: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.documentation.gettingStarted.content.label'
-      $link: 'https://docs.typo3.org/m/typo3/tutorial-getting-started/main/en-us/Index.html'
-      $target: '_blank'
-
   dashboard.buttons.docTypoScriptReference:
     class: 'TYPO3\CMS\Dashboard\Widgets\Provider\ButtonProvider'
     arguments:
@@ -98,21 +91,6 @@ services:
         height: 'medium'
         width: 'medium'
 
-  dashboard.widget.docGettingStarted:
-    class: 'TYPO3\CMS\Dashboard\Widgets\CtaWidget'
-    arguments:
-      $buttonProvider: '@dashboard.buttons.docGettingStarted'
-      $options:
-        text: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.documentation.gettingStarted.text'
-    tags:
-      - name: dashboard.widget
-        identifier: 'docGettingStarted'
-        groupNames: 'documentation'
-        title: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.documentation.gettingStarted.title'
-        description: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.documentation.gettingStarted.description'
-        iconIdentifier: 'content-widget-text'
-        height: 'small'
-
   dashboard.widget.docTypoScriptReference:
     class: 'TYPO3\CMS\Dashboard\Widgets\CtaWidget'
     arguments:
@@ -142,18 +120,6 @@ services:
         description: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.documentation.TSconfigReference.description'
         iconIdentifier: 'content-widget-text'
         height: 'small'
-
-  dashboard.widget.t3information:
-    class: 'TYPO3\CMS\Dashboard\Widgets\T3GeneralInformationWidget'
-    tags:
-      - name: dashboard.widget
-        identifier: 't3information'
-        groupNames: 'general'
-        title: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.t3information.title'
-        description: 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:widgets.t3information.description'
-        iconIdentifier: 'content-widget-text'
-        height: 'medium'
-        width: 'medium'
 
   dashboard.widget.typeOfUsers:
     class: 'TYPO3\CMS\Dashboard\Widgets\DoughnutChartWidget'

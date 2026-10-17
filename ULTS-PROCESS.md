@@ -376,6 +376,17 @@ every release:
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
+## Coverage matrix: 12.4.45.8 (in development)
+
+Changes on `12.4-ults` since 12.4.45.7. This section is completed when
+12.4.45.8 is released.
+
+### Other changes
+
+| Change on `12.4-ults` | Notes |
+|---|---|
+| Dashboard widgets "About TYPO3" and "Getting Started with TYPO3" removed | Part of the KasperCMS branding: the widgets are no longer registered, and new dashboards start without default widgets. Existing dashboards skip them. The widget class `T3GeneralInformationWidget` remains for extensions that register it themselves. |
+
 ## Coverage matrix: 12.4.45.7
 
 KasperCMS 12.4.45.7, released 2026-10-17. Checked against the GitHub

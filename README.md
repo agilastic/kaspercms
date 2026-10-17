@@ -234,7 +234,8 @@ project name and the list of packages.
   on the login page and backend colours taken from the logo, so that a
   KasperCMS installation can be told apart from an official TYPO3 one at a
   glance. A custom `backendLogo`, `loginLogo` or `loginHighlightColor` in the
-  backend extension configuration still takes precedence.
+  backend extension configuration still takes precedence. The dashboard
+  widgets "About TYPO3" and "Getting Started with TYPO3" are not included.
 - No new features, no breaking changes and no upgrades to new major
   versions of dependencies
 

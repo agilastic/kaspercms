@@ -5,7 +5,8 @@ return [
         'title' => 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:dashboard.default',
         'description' => 'LLL:EXT:dashboard/Resources/Private/Language/locallang.xlf:dashboard.default.description',
         'iconIdentifier' => 'content-dashboard',
-        'defaultWidgets' => ['t3information', 'docGettingStarted'],
+        // KasperCMS: the "About TYPO3" and "Getting Started with TYPO3" widgets are not registered
+        'defaultWidgets' => [],
         'showInWizard' => false,
     ],
     'empty' => [
