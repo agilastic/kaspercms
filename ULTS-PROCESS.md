@@ -173,11 +173,13 @@ done
 ./Build/Scripts/runTests.sh -s unitJavascript                     # when JS/CKEditor changed
 ```
 
-Tests run against PHP 8.1, the minimum PHP version of TYPO3 12.4.
+Tests run against PHP 8.1, the minimum PHP version of TYPO3 12.4, and
+against PHP 8.3 and 8.5, the recommended versions. Before a release, the
+complete unit and functional test suites also run locally on all three.
 
 On GitHub, `.github/workflows/ci.yml` runs CGL, PHPStan, the exception code
-check, unit tests (PHP 8.1 and 8.5) and the functional tests (SQLite, four
-chunks) for every push and pull request on `12.4-ults`.
+check, the unit tests and the functional tests (SQLite, four chunks) on
+PHP 8.1, 8.3 and 8.5 for every push and pull request on `12.4-ults`.
 
 `.github/workflows/dependency-updates.yml` runs `composer update --patch-only`
 on the first day of every month and opens a pull request when locked
