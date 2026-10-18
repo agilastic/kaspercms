@@ -304,7 +304,8 @@ The workflow `.github/workflows/ults-bugfix-backport.yml` runs every day at
 05:30 UTC (or manually for given commit hashes). For each candidate that
 applies cleanly and has no pull request yet, it cherry-picks the commit with
 `-x` to a branch `backport/<hash>`, runs CGL, PHPStan, the exception code
-check, unit and functional tests, and opens a pull request labelled
+check and the unit and functional tests on PHP 8.1, 8.3 and 8.5 (in jobs
+without write permissions), and opens a pull request labelled
 `ults-backport` (a draft if a check failed). Merging stays manual: review the
 change for v12 compatibility and merge with "Rebase and merge". A rejected
 candidate is closed and listed in the table below.

@@ -5,8 +5,9 @@ name: ULTS bug fix backport
 # (a draft when a check failed). Merging stays a manual decision.
 #
 # The checks execute the cherry-picked code, Composer plugins and tests, so
-# they run in a job without write permissions. A separate job pushes the
-# branch and opens the pull request from a fresh checkout.
+# they run in jobs without write permissions (PHP 8.1, 8.3 and 8.5 in
+# parallel). A separate job pushes the branch and opens the pull request
+# from a fresh checkout.
 #
 # Pull requests opened with the GITHUB_TOKEN need a manual approval before the
 # CI workflow runs on them, so the checks run here and their results are part
@@ -97,19 +98,16 @@ jobs:
           echo "Selected: $json"
           echo "commits=$json" >> "$GITHUB_OUTPUT"
 
-  # Cherry-picks the commit and runs the CI checks. This job has no write
-  # permissions: the cherry-picked code, Composer plugins and tests run here.
-  # The commit is handed over as a git bundle created before any check runs.
-  backport:
+  # Cherry-picks the commit and hands it over as a git bundle. No checks run
+  # here, so the bundle is created before any code of the backport runs.
+  pick:
     needs: candidates
     if: needs.candidates.outputs.commits != '[]'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
     permissions:
       contents: read
     strategy:
       fail-fast: false
-      max-parallel: 2
       matrix:
         commit: ${{ fromJSON(needs.candidates.outputs.commits) }}
     steps:
@@ -150,10 +148,47 @@ jobs:
           path: handover/
           retention-days: 3
 
+  # Runs the CI checks on PHP 8.1, 8.3 and 8.5 without write permissions:
+  # the cherry-picked code, Composer plugins and tests run here. CGL, PHPStan
+  # and the exception code check run once (PHP 8.1).
+  checks:
+    needs: [candidates, pick]
+    if: always() && needs.candidates.outputs.commits != '[]' && needs.candidates.outputs.commits != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        commit: ${{ fromJSON(needs.candidates.outputs.commits) }}
+        php: ['8.1', '8.3', '8.5']
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the handed over commit
+        id: handover
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: backport-${{ matrix.commit }}
+          path: handover
+
       - name: Run CI checks
-        if: steps.pick.outputs.picked == '1'
+        if: steps.handover.outcome == 'success'
+        env:
+          PHP_VERSION: ${{ matrix.php }}
         run: |
           set +e
+          branch="backport/${{ matrix.commit }}"
+          git fetch --quiet handover/backport.bundle "+refs/heads/$branch:refs/heads/$branch"
+          git switch --quiet "$branch"
           : > checks.md
           : > failures.md
           run_check() {
@@ -170,27 +205,29 @@ jobs:
               { echo; echo "<details><summary>$name output (last 60 lines)</summary>"; echo; echo '```'; tail -n 60 check.log; echo '```'; echo "</details>"; } >> failures.md
             fi
           }
-          run_check "Composer install" -p 8.1 -s composer -- install --no-progress
-          run_check "CGL" -p 8.1 -s cgl -n
-          run_check "PHPStan" -p 8.1 -s phpstan
-          run_check "Exception codes" -s checkExceptionCodes
-          run_check "Unit tests (PHP 8.1)" -p 8.1 -s unit
-          run_check "Functional tests (SQLite)" -p 8.1 -s functional -d sqlite
+          run_check "Composer install (PHP $PHP_VERSION)" -p "$PHP_VERSION" -s composer -- install --no-progress
+          if [ "$PHP_VERSION" = "8.1" ]; then
+            run_check "CGL" -p 8.1 -s cgl -n
+            run_check "PHPStan" -p 8.1 -s phpstan
+            run_check "Exception codes" -s checkExceptionCodes
+          fi
+          run_check "Unit tests (PHP $PHP_VERSION)" -p "$PHP_VERSION" -s unit
+          run_check "Functional tests (PHP $PHP_VERSION, SQLite)" -p "$PHP_VERSION" -s functional -d sqlite
           mkdir -p results
           cp checks.md failures.md results/
 
       - name: Hand over the check results
-        if: steps.pick.outputs.picked == '1'
+        if: steps.handover.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: checks-${{ matrix.commit }}
+          name: checks-${{ matrix.commit }}-php${{ matrix.php }}
           path: results/
           retention-days: 3
 
   # Pushes the branch and opens the pull request from a fresh checkout. No
   # code of the backport is executed here.
   pull-request:
-    needs: [candidates, backport]
+    needs: [candidates, checks]
     if: always() && needs.candidates.outputs.commits != '[]' && needs.candidates.outputs.commits != ''
     runs-on: ubuntu-latest
     permissions:
@@ -221,7 +258,7 @@ jobs:
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: checks-${{ matrix.commit }}
+          pattern: checks-${{ matrix.commit }}-php*
           path: results
 
       - name: Open pull request
@@ -244,9 +281,19 @@ jobs:
           git -c core.hooksPath=/dev/null push \
             "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git" "$branch"
           ok=1
-          if [ ! -f results/checks.md ] || [ ! -s results/checks.md ] || grep -q '❌' results/checks.md; then
-            ok=0
-          fi
+          checks=""
+          failures=""
+          for php in 8.1 8.3 8.5; do
+            dir="results/checks-${{ matrix.commit }}-php$php"
+            if [ -s "$dir/checks.md" ]; then
+              checks+="$(cat "$dir/checks.md")"$'\n'
+              [ -s "$dir/failures.md" ] && failures+="$(cat "$dir/failures.md")"$'\n'
+              grep -q '❌' "$dir/checks.md" && ok=0
+            else
+              checks+="| Checks on PHP $php | ❌ no results (job failed or was cancelled) |"$'\n'
+              ok=0
+            fi
+          done
           subject=$(git log -1 --format=%s "$branch")
           resolves=$(git log -1 --format='%(trailers:key=Resolves,valueonly,separator=%x2C )' "$branch")
           {
@@ -259,12 +306,8 @@ jobs:
             echo
             echo "| Check | Result |"
             echo "|---|---|"
-            if [ -f results/checks.md ]; then
-              cat results/checks.md
-              cat results/failures.md 2>/dev/null
-            else
-              echo "| All checks | ❌ no results (job failed or was cancelled) |"
-            fi
+            printf '%s' "$checks"
+            printf '%s' "$failures"
             echo
             echo "## Before merging"
             echo
