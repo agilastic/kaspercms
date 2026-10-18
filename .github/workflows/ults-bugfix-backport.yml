@@ -202,7 +202,10 @@ jobs:
               echo "| $name | ✅ passed |" >> checks.md
             else
               echo "| $name | ❌ failed |" >> checks.md
-              { echo; echo "<details><summary>$name output (last 60 lines)</summary>"; echo; echo '```'; tail -n 60 check.log; echo '```'; echo "</details>"; } >> failures.md
+              # Without terminal escape sequences and progress bars
+              { echo; echo "<details><summary>$name output (last 60 lines)</summary>"; echo; echo '```'
+                sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' check.log | tr '\r' '\n' | grep -vE '░|▓' | tail -n 60
+                echo '```'; echo "</details>"; } >> failures.md
             fi
           }
           run_check "Composer install (PHP $PHP_VERSION)" -p "$PHP_VERSION" -s composer -- install --no-progress
