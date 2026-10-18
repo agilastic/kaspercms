@@ -94,6 +94,12 @@ final class UltsSecurityCheck
 
     public function run(): int
     {
+        foreach (self::DEFAULT_OPTIONS as $name => $default) {
+            if (!is_string($this->options[$name]) || $this->options[$name] === '') {
+                fwrite(STDERR, sprintf('Option --%s needs a value, e.g. --%s=%s' . PHP_EOL, $name, $name, $default));
+                return 2;
+            }
+        }
         $this->loadDocumentedIds();
         $this->report[] = '# KasperCMS ULTS security check';
         $this->report[] = '';
@@ -505,8 +511,9 @@ final class UltsSecurityCheck
             if (!preg_match('/^(TYPO3-CORE-SA-\d{4}-\d{3})/', $title, $match)) {
                 continue;
             }
-            $published = gmdate('Y-m-d', (int)strtotime((string)$item->pubDate));
-            if ($published < $this->options['since']) {
+            $timestamp = strtotime((string)$item->pubDate);
+            $published = $timestamp === false ? 'unknown date' : gmdate('Y-m-d', $timestamp);
+            if ($timestamp !== false && $published < $this->options['since']) {
                 continue;
             }
             $checked++;
@@ -669,14 +676,14 @@ final class UltsSecurityCheck
 
     private function ghApi(string $endpoint): ?array
     {
-        $output = $this->exec('gh api --paginate ' . escapeshellarg($endpoint) . ' 2>/dev/null', $exitCode);
-        // --paginate concatenates JSON arrays of all pages
-        $data = json_decode((string)preg_replace('/\]\s*\[/', ',', trim($output)), true);
-        if ($exitCode !== 0 || !is_array($data)) {
+        // --slurp wraps the JSON arrays of all pages into one array
+        $output = $this->exec('gh api --paginate --slurp ' . escapeshellarg($endpoint) . ' 2>/dev/null', $exitCode);
+        $pages = json_decode($output, true);
+        if ($exitCode !== 0 || !is_array($pages)) {
             $this->error(sprintf('GitHub API request "%s" failed (is gh installed and authenticated?).', $endpoint));
             return null;
         }
-        return $data;
+        return array_merge(...array_values(array_filter($pages, 'is_array')));
     }
 
     private function exec(string $command, ?int &$exitCode = null): string
