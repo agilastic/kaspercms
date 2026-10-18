@@ -15,8 +15,8 @@ name: ULTS bug fix backport
 
 on:
   schedule:
-    # every day, 05:30 UTC (07:30 CEST), after the bug fix check
-    - cron: '30 5 * * *'
+    # every day, 04:00 UTC (06:00 CEST, 05:00 CET)
+    - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       commits:

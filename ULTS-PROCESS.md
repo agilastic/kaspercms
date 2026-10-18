@@ -301,7 +301,8 @@ day at 05:00 UTC and mails the report in the same way when the candidates
 changed.
 
 The workflow `.github/workflows/ults-bugfix-backport.yml` runs every day at
-05:30 UTC (or manually for given commit hashes). For each candidate that
+04:00 UTC (06:00 CEST), or manually for given commit hashes. For each
+candidate that
 applies cleanly and has no pull request yet, it cherry-picks the commit with
 `-x` to a branch `backport/<hash>`, runs CGL, PHPStan, the exception code
 check and the unit and functional tests on PHP 8.1, 8.3 and 8.5 (in jobs
