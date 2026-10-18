@@ -397,6 +397,18 @@ every release:
 Changes on `12.4-ults` since 12.4.45.7. This section is completed when
 12.4.45.8 is released.
 
+### Bug fixes
+
+Upstream bug fixes from `13.4` (see [Bug fix backports](#bug-fix-backports)),
+proposed by the backport workflow and reviewed for 12.4 compatibility.
+
+| Fix on `12.4-ults` | Reference |
+|---|---|
+| Avoid error when visiting page with non-existing language | Forge #107468 |
+| Fix IRRE usecombination elementBrowserEnabled evaluation | Forge #109231 (`appearance.elementBrowserEnabled` is now also respected when the selector field has no own `appearance`) |
+| Avoid using null as array offset | Forge #109236 |
+| Respect disabled pages in form navigation | Forge #102055 |
+
 ### Other changes
 
 | Change on `12.4-ults` | Notes |
