@@ -392,10 +392,16 @@ every release:
 - Tools that expect three version parts may fail on `12.4.45.N` (known: DDEV),
   see the [README](README.md#known-limitations).
 
-## Coverage matrix: 12.4.45.8 (in development)
+## Coverage matrix: 12.4.45.8
 
-Changes on `12.4-ults` since 12.4.45.7. This section is completed when
-12.4.45.8 is released.
+KasperCMS 12.4.45.8, released 2026-10-18. Checked against the GitHub
+advisories, the TYPO3 security feed, `composer audit` and the TYPO3 git
+history on 2026-10-18 (automated ULTS security check): no new advisories
+affecting 12.4 were published since 12.4.45.7. This release contains no
+security fixes.
+
+Verification: CGL, PHPStan (PHP 8.1, 8.3 and 8.5), the integrity checks of
+step 6, unit tests and functional tests (SQLite) on PHP 8.1, 8.3 and 8.5.
 
 ### Bug fixes
 
@@ -414,6 +420,10 @@ proposed by the backport workflow and reviewed for 12.4 compatibility.
 | Change on `12.4-ults` | Notes |
 |---|---|
 | Dashboard widgets "About TYPO3" and "Getting Started with TYPO3" removed | Part of the KasperCMS branding: the widgets are no longer registered, and new dashboards start without default widgets. Existing dashboards skip them. The widget class `T3GeneralInformationWidget` remains for extensions that register it themselves. |
+| Bug fix backport workflow | Checks on PHP 8.1, 8.3 and 8.5 in jobs without write permissions; runs daily at 04:00 UTC (06:00 CEST) |
+| Workflows | Third-party actions and images pinned to commit SHAs and digests |
+| Website | Lists only releases whose tag exists |
+| ULTS security check | GitHub API pagination with `--slurp`, feed items without a date are reported, options without a value are rejected |
 
 ## Coverage matrix: 12.4.45.7
 
