@@ -328,6 +328,7 @@ report them again.
 | `9e3ace89048` | Remove garbage collected rows in batches | Deferred: needs an adaptation to Doctrine DBAL 3 (`Table::getPrimaryKeyConstraint()` is DBAL 4) and to the 12.4 table configuration |
 | `e2f9e9950d8` | Use sprite references in SvgSpriteIconProvider inline output | Changes the inline output of the core icons from standalone SVG markup to sprite references (`<use>`), which changes the DOM existing styles and scripts rely on; an optimisation rather than a bug fix |
 | `9f943cfa338` | Skip transient properties in Extbase validation | Stops the automatic recursive validation of transient child models that have public getters, so objects rejected so far would be accepted |
+| `4508dac1bf1` | Respect integrityStatus option in redirects:cleanup command | Fixes the integrity status option of a v13 feature (commit 422d4777cdc, "Show the redirect integrity status"); 12.4 has neither the option nor `Demand::getIntegrityStatus()` |
 
 ## 8. Release
 
