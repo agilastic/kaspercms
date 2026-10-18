@@ -271,9 +271,10 @@ jobs:
           base=$(cat handover/base)
           sha=$(cat handover/upstream)
           git fetch --quiet handover/backport.bundle "+refs/heads/$branch:refs/heads/$branch"
-          # Exactly one commit on top of the checked out base, carrying the
+          # Exactly one commit on top of a base that is part of 12.4-ults (the
+          # branch may have moved on while the checks ran), carrying the
           # expected "cherry picked from" line.
-          if [ "$(git rev-parse "$branch^")" != "$base" ] || [ "$base" != "$(git rev-parse HEAD)" ] \
+          if ! git merge-base --is-ancestor "$base" HEAD || [ "$(git rev-parse "$branch^")" != "$base" ] \
             || ! git log -1 --format=%B "$branch" | grep -qxF "(cherry picked from commit $sha)"; then
             echo "::error::Handed over commit for ${{ matrix.commit }} is not the expected cherry-pick."
             exit 1
