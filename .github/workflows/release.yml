@@ -1,0 +1,369 @@
+name: Release
+
+# Creates the next KasperCMS release (the version of the current
+# 12.4.45.N-dev state) when started by hand:
+#
+# 1. preconditions: changes since the last release, no open (non-draft)
+#    backport pull requests, the tag does not exist yet
+# 2. all checks: CGL, PHPStan and the integrity checks, unit and functional
+#    tests on PHP 8.1, 8.3 and 8.5
+# 3. build (read-only): documentation (Build/Scripts/prepareRelease.php),
+#    ULTS security check on the result (no open items), release commit, tag,
+#    -dev commit, tarball, checksum and release notes, handed over as a git
+#    bundle and artifacts
+# 4. publish (the only job with write permissions, skipped in a dry run):
+#    verifies the handed over commits, pushes branch and tag, publishes the
+#    GitHub release, runs the Composer repository workflow and checks the
+#    published files
+#
+# Releases and pushes made with the GITHUB_TOKEN do not trigger other
+# workflows, so the Composer repository workflow is started explicitly.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: test and build everything, but do not push or publish'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CI: 'true'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      version: ${{ steps.info.outputs.version }}
+      previous: ${{ steps.info.outputs.previous }}
+      next: ${{ steps.info.outputs.next }}
+      base: ${{ steps.info.outputs.base }}
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+      - name: Check preconditions
+        id: info
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! info=$(php Build/Scripts/prepareRelease.php info); then
+            echo "$info"
+            echo "::error::No changes since the last release."
+            exit 1
+          fi
+          echo "$info"
+          version=$(jq -r .version <<< "$info")
+          if git rev-parse -q --verify "refs/tags/v$version" > /dev/null; then
+            echo "::error::Tag v$version already exists."
+            exit 1
+          fi
+          open=$(gh pr list --state open --label ults-backport --json isDraft --jq '[.[] | select(.isDraft | not)] | length')
+          if [ "$open" != "0" ]; then
+            echo "::error::$open backport pull request(s) are still open. Merge or close them first."
+            exit 1
+          fi
+          {
+            echo "version=$version"
+            echo "previous=$(jq -r .previous <<< "$info")"
+            echo "next=$(jq -r .next <<< "$info")"
+            echo "base=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+  static:
+    name: CGL, PHPStan, integrity
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          persist-credentials: false
+      - name: Composer install
+        run: Build/Scripts/runTests.sh -b docker -p 8.1 -s composer -- install --no-progress
+      - name: CGL
+        run: Build/Scripts/runTests.sh -b docker -p 8.1 -s cgl -n
+      - name: PHPStan (PHP 8.1, 8.3, 8.5)
+        run: |
+          for php in 8.1 8.3 8.5; do
+            Build/Scripts/runTests.sh -b docker -p "$php" -s phpstan
+          done
+      - name: Integrity checks
+        run: |
+          for suite in checkExceptionCodes checkRst checkAnnotations checkTestClassFinal \
+                       checkNamespaceIntegrity lintServicesYaml checkExtensionScannerRst \
+                       composerValidate checkComposer; do
+            Build/Scripts/runTests.sh -b docker -s "$suite"
+          done
+
+  unit:
+    name: Unit tests (PHP ${{ matrix.php }})
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['8.1', '8.3', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          persist-credentials: false
+      - name: Composer install
+        run: Build/Scripts/runTests.sh -b docker -p ${{ matrix.php }} -s composer -- install --no-progress
+      - name: Unit tests
+        run: Build/Scripts/runTests.sh -b docker -p ${{ matrix.php }} -s unit
+
+  functional:
+    name: Functional tests (PHP ${{ matrix.php }}, chunk ${{ matrix.chunk }}/4)
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['8.1', '8.3', '8.5']
+        chunk: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          persist-credentials: false
+      - name: Composer install
+        run: Build/Scripts/runTests.sh -b docker -p ${{ matrix.php }} -s composer -- install --no-progress
+      - name: Functional tests
+        run: Build/Scripts/runTests.sh -b docker -p ${{ matrix.php }} -s functional -d sqlite -c ${{ matrix.chunk }}/4
+
+  # Read-only: creates the release commits, the tag and the release files.
+  # composer install runs code of dependencies here, without write access.
+  build:
+    needs: [prepare, static, unit, functional]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      NEXT: ${{ needs.prepare.outputs.next }}
+      BASE: ${{ needs.prepare.outputs.base }}
+    steps:
+      - name: Checkout the tested state
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.base }}
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+      - name: Prepare the documentation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c release-work
+          php Build/Scripts/prepareRelease.php docs --date="$(date -u +%F)"
+          git diff --stat
+
+      - name: Check the wording of the documentation
+        run: |
+          if git diff -U0 | grep -E '^\+' | grep -inE 'ELTS|GmbH|Skårhøj|subscription|€|12\.4\.(4[6-9]|50)\b'; then
+            echo "::error::The generated documentation contains wording that must not be published."
+            exit 1
+          fi
+
+      - name: ULTS security check on the release state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git remote add upstream https://github.com/TYPO3/typo3.git
+          set +e
+          php Build/Scripts/ultsSecurityCheck.php --fetch > ults-report.md
+          status=$?
+          set -e
+          cat ults-report.md >> "$GITHUB_STEP_SUMMARY"
+          if [ $status -ne 0 ]; then
+            echo "::error::The ULTS security check reports open items or could not be completed (exit $status), see the summary."
+            exit 1
+          fi
+
+      - name: Create release commits and tag
+        run: |
+          git add README.md ULTS-PROCESS.md
+          git commit -q -m "[DOCS] Prepare documentation for KasperCMS $VERSION" \
+            -m "Add $VERSION to the release table and its coverage matrix to ULTS-PROCESS.md." \
+            -m "Releases: 12.4"
+          php Build/Scripts/prepareRelease.php bump-release
+          git add -u
+          git commit -q -m "[RELEASE] Release of KasperCMS $VERSION" \
+            -m "See the coverage matrix in ULTS-PROCESS.md." -m "Releases: 12.4"
+          git tag -a "v$VERSION" -m "KasperCMS $VERSION"
+          php Build/Scripts/prepareRelease.php bump-dev
+          git add -u
+          git commit -q -m "[TASK] Set TYPO3 version to $NEXT-dev" -m "Releases: 12.4"
+          git log --oneline "$BASE..HEAD"
+          mkdir -p handover
+          git bundle create handover/release.bundle "$BASE..release-work" "v$VERSION"
+
+      - name: Build the tarball
+        run: |
+          mkdir -p dist work
+          git archive --prefix="kaspercms_src-$VERSION/" "v$VERSION" | tar -x -C work
+          docker run --rm -u "$(id -u):$(id -g)" -e COMPOSER_CACHE_DIR=/tmp/cc \
+            -v "$PWD/work/kaspercms_src-$VERSION":/app -w /app ghcr.io/typo3/core-testing-php81:2.15 \
+            composer install --no-dev --optimize-autoloader --no-progress --no-interaction
+          tar -czf "dist/kaspercms_src-$VERSION.tar.gz" -C work "kaspercms_src-$VERSION"
+          (cd dist && sha256sum "kaspercms_src-$VERSION.tar.gz" > "kaspercms_src-$VERSION.tar.gz.sha256")
+          cat "dist/kaspercms_src-$VERSION.tar.gz.sha256"
+
+      - name: Write the release notes
+        run: |
+          checksum=$(cut -d' ' -f1 "dist/kaspercms_src-$VERSION.tar.gz.sha256")
+          php Build/Scripts/prepareRelease.php notes --checksum="$checksum" > dist/notes.md
+          if grep -inE 'ELTS|GmbH|Skårhøj|subscription|€|12\.4\.(4[6-9]|50)\b' dist/notes.md; then
+            echo "::error::The release notes contain wording that must not be published."
+            exit 1
+          fi
+          {
+            echo "## KasperCMS $VERSION"
+            echo
+            cat dist/notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Hand over the release
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ needs.prepare.outputs.version }}
+          path: |
+            handover/
+            dist/
+          retention-days: 14
+
+  # Pushes and publishes from a fresh checkout; no code of the repository is
+  # executed with the write token.
+  publish:
+    needs: [prepare, build]
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      NEXT: ${{ needs.prepare.outputs.next }}
+      BASE: ${{ needs.prepare.outputs.base }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout 12.4-ults
+        uses: actions/checkout@v4
+        with:
+          ref: 12.4-ults
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+      - name: Fetch the release
+        uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.prepare.outputs.version }}
+          path: release
+
+      - name: Verify the handed over release
+        run: |
+          if [ "$(git rev-parse HEAD)" != "$BASE" ]; then
+            echo "::error::12.4-ults moved on since the checks started. Start the release again."
+            exit 1
+          fi
+          git fetch --quiet release/handover/release.bundle \
+            "+refs/heads/release-work:refs/heads/release-work" "+refs/tags/v$VERSION:refs/tags/v$VERSION"
+          subjects=$(git log --reverse --format=%s "$BASE..release-work")
+          expected=$(printf '%s\n' "[DOCS] Prepare documentation for KasperCMS $VERSION" \
+            "[RELEASE] Release of KasperCMS $VERSION" "[TASK] Set TYPO3 version to $NEXT-dev")
+          if [ "$subjects" != "$expected" ]; then
+            echo "::error::Unexpected commits in the handed over release:"; echo "$subjects"
+            exit 1
+          fi
+          if [ "$(git rev-parse "release-work~3")" != "$BASE" ] \
+            || [ "$(git rev-parse "v$VERSION^{commit}")" != "$(git rev-parse "release-work~1")" ]; then
+            echo "::error::The handed over commits or the tag do not match the tested state."
+            exit 1
+          fi
+          # The documentation commit only changes the documentation, the
+          # version commits only change version numbers.
+          if git diff --name-only "$BASE" "release-work~2" | grep -vxE 'README\.md|ULTS-PROCESS\.md'; then
+            echo "::error::The documentation commit changes other files."
+            exit 1
+          fi
+          if git diff --name-only "release-work~2" release-work \
+            | grep -vE '(^|/)composer\.json$|(^|/)ext_emconf\.php$|^typo3/sysext/core/Classes/Information/Typo3Version\.php$|^Build/composer/composer\.dist\.json$'; then
+            echo "::error::The version commits change other files."
+            exit 1
+          fi
+          if git diff -U0 "release-work~2" release-work | grep -E '^[-+][^-+]' \
+            | grep -vE '12\.4\.(45\.[0-9]+(-dev)?|\*@dev)'; then
+            echo "::error::The version commits contain other changes than version numbers."
+            exit 1
+          fi
+          (cd release/dist && sha256sum -c "kaspercms_src-$VERSION.tar.gz.sha256")
+
+      - name: Push branch and tag
+        run: |
+          git -c core.hooksPath=/dev/null push --atomic \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git" \
+            "release-work:refs/heads/12.4-ults" "refs/tags/v$VERSION"
+
+      - name: Publish the GitHub release
+        run: |
+          gh release create "v$VERSION" --verify-tag --latest --title "KasperCMS $VERSION" \
+            --notes-file release/dist/notes.md \
+            "release/dist/kaspercms_src-$VERSION.tar.gz" "release/dist/kaspercms_src-$VERSION.tar.gz.sha256"
+
+      - name: Run the Composer repository workflow
+        run: |
+          started=$(date -u +%FT%TZ)
+          gh workflow run composer-repository.yml --ref 12.4-ults
+          for _ in $(seq 1 30); do
+            run=$(gh run list --workflow composer-repository.yml --event workflow_dispatch --limit 5 \
+              --json databaseId,createdAt --jq "[.[] | select(.createdAt >= \"$started\")][0].databaseId // empty")
+            [ -n "$run" ] && break
+            sleep 10
+          done
+          if [ -z "$run" ]; then
+            echo "::error::The Composer repository workflow did not start."
+            exit 1
+          fi
+          gh run watch "$run" --exit-status > /dev/null
+
+      - name: Check the published release
+        run: |
+          mkdir check && cd check
+          gh release download "v$VERSION" --pattern "kaspercms_src-$VERSION.tar.gz*"
+          sha256sum -c "kaspercms_src-$VERSION.tar.gz.sha256"
+          gh release download "v$VERSION" --pattern "typo3-cms-core-$VERSION.zip"
+          for _ in $(seq 1 30); do
+            if curl -fsSL "https://agilastic.github.io/kaspercms/packages.json?$(date +%s)" -o packages.json \
+              && jq -e --arg v "$VERSION" '.packages["typo3/cms-core"][$v]' packages.json > /dev/null \
+              && curl -fsSL "https://agilastic.github.io/kaspercms/?$(date +%s)" | grep -q "Download $VERSION"; then
+              break
+            fi
+            sleep 20
+          done
+          expected=$(jq -r --arg v "$VERSION" '.packages["typo3/cms-core"][$v].dist.shasum' packages.json)
+          actual=$(sha1sum "typo3-cms-core-$VERSION.zip" | cut -d' ' -f1)
+          if [ "$expected" != "$actual" ]; then
+            echo "::error::packages.json ($expected) does not match the published cms-core archive ($actual)."
+            exit 1
+          fi
+          curl -fsSL "https://agilastic.github.io/kaspercms/?$(date +%s)" | grep -q "Download $VERSION"
+          echo "KasperCMS $VERSION is published: https://github.com/${GH_REPO}/releases/tag/v$VERSION" >> "$GITHUB_STEP_SUMMARY"

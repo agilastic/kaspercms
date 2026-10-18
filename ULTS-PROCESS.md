@@ -375,6 +375,33 @@ every release:
    release data from the README release table; releases are listed once their
    tag exists).
 
+### Automated release
+
+`.github/workflows/release.yml` performs steps 1–7 when started by hand
+("Run workflow" in GitHub Actions; "dry run" is preselected and builds
+everything without publishing). It releases the version of the current
+`12.4.45.N-dev` state when:
+
+- security fixes, upstream bug fixes or other changes of the shipped code
+  were committed since the previous release (workflow and documentation
+  changes alone do not lead to a release),
+- no backport pull request is open (drafts excepted),
+- all checks pass: CGL, PHPStan and the integrity checks, unit and
+  functional tests on PHP 8.1, 8.3 and 8.5,
+- the ULTS security check reports no open items for the release state.
+
+`Build/Scripts/prepareRelease.php` writes the release table entry and the
+coverage matrix: it completes an existing "Coverage matrix: 12.4.45.N (in
+development)" section with all security fixes (CVE, bulletin, Forge issue)
+and upstream bug fixes since the previous release that are not listed yet.
+Explanations that need a human decision (for example "not affected"
+advisories or behaviour changes) are added to that section beforehand.
+
+The build job creates the commits, the tag, the tarball and the release
+notes without write permissions; the publish job verifies them, pushes,
+publishes the GitHub release, runs the Composer repository workflow and
+checks the published files.
+
 ### Known limitations
 
 - The install tool's core update check and the Reports module query
