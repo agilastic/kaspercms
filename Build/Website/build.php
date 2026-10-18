@@ -49,8 +49,18 @@ foreach (explode("\n", $readme) as $line) {
         'notes' => cleanMarkdown($matches[5]),
     ];
 }
+// Releases are listed only once their tag exists. The README release table
+// is updated before the tag is pushed, which would otherwise publish a
+// download link to a release that does not exist yet.
+exec('git -C ' . escapeshellarg($rootPath) . ' tag --list ' . escapeshellarg('v12.4.45.*') . ' 2>/dev/null', $tags, $exitCode);
+if ($exitCode === 0) {
+    $releases = array_values(array_filter(
+        $releases,
+        static fn(array $release): bool => in_array('v' . $release['version'], $tags, true)
+    ));
+}
 if ($releases === []) {
-    fwrite(STDERR, 'No releases found in README.md.' . PHP_EOL);
+    fwrite(STDERR, 'No released versions found in README.md.' . PHP_EOL);
     exit(2);
 }
 usort($releases, static fn(array $a, array $b): int => version_compare($b['version'], $a['version']));

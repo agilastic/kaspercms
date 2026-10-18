@@ -342,22 +342,31 @@ every release:
 
 ### Steps
 
-1. Commit `[RELEASE] Release of KasperCMS 12.4.45.N`: set
+1. Run `php Build/Scripts/ultsSecurityCheck.php --fetch`: it must report no
+   open items. CI must be green on the code to be released, and the complete
+   unit and functional test suites must pass on PHP 8.1, 8.3 and 8.5.
+2. Commit `[DOCS] Prepare documentation for KasperCMS 12.4.45.N`: add the
+   release with its date to the [release table in the README](README.md#releases)
+   and complete its coverage matrix in this file, so that the tag contains the
+   current documentation.
+3. Commit `[RELEASE] Release of KasperCMS 12.4.45.N`: set
    `Typo3Version::VERSION`, pin `typo3/cms-*` requirements in all
    `composer.json` files and `Build/composer/composer.dist.json`, and update the
    `ext_emconf.php` versions.
-2. Create the annotated tag `v12.4.45.N`.
-3. Commit `[TASK] Set TYPO3 version to 12.4.45.(N+1)-dev`: requirements go
+4. Create the annotated tag `v12.4.45.N`.
+5. Commit `[TASK] Set TYPO3 version to 12.4.45.(N+1)-dev`: requirements go
    back to `12.4.*@dev`.
-4. Add the release with its date to the
-   [release table in the README](README.md#releases) and publish
-   release notes with the coverage matrix (see below).
-5. Publish the GitHub release with the tarball and its checksum. The workflow
+6. Build the tarball from the tag (`git archive`, then
+   `composer install --no-dev --optimize-autoloader` with PHP 8.1) and its
+   SHA-256 checksum.
+7. Push the branch and the tag, then publish the GitHub release with the
+   tarball, the checksum and the release notes right away. The workflow
    `.github/workflows/composer-repository.yml` then attaches the Composer
    archives of all `typo3/cms-*` packages to the release, updates
    `packages.json` and rebuilds the website
    (<https://agilastic.github.io/kaspercms/>, source in `Build/Website/`,
-   release data from the README release table).
+   release data from the README release table; releases are listed once their
+   tag exists).
 
 ### Known limitations
 
