@@ -221,8 +221,9 @@ project name and the list of packages.
 
 ## What KasperCMS Contains
 
-- Backports of all public TYPO3 core security fixes that affect 12.4,
-  taken from the public TYPO3 branches (`13.4`, `14.3`, `main`)
+- Backports of public TYPO3 core security fixes that affect 12.4, taken
+  from the public TYPO3 branches (`13.4`, `14.3`, `main`); each release
+  documents them in its coverage matrix
 - Follow-up fixes for regressions caused by those security fixes
 - Backports of upstream bug fixes from the `13.4` and 14.x branches that apply to 12.4
   without risk: no new features, no API or database schema changes (see
@@ -236,18 +237,27 @@ project name and the list of packages.
   glance. A custom `backendLogo`, `loginLogo` or `loginHighlightColor` in the
   backend extension configuration still takes precedence. The dashboard
   widgets "About TYPO3" and "Getting Started with TYPO3" are not included.
-- No new features, no breaking changes and no upgrades to new major
-  versions of dependencies
+- No new features, no breaking changes and no upgrades to new major versions
+  of dependencies. Exception: a new major version is used when the security
+  fix is only available there and TYPO3 made the same update in its maintained
+  branches (`enshrined/svg-sanitize` `^1.0` since 12.4.45.1, which rejects SVG
+  files with entity references)
 
 ## Security Process
 
-Every CVE published for TYPO3 CMS is checked against three sources before
-a release:
+Before a release, the published security information is compared with the
+`12.4-ults` branch. An automated check (daily and before every release)
+covers:
 
-- the [OpenCVE list](https://app.opencve.io/cve/?vendor=typo3&product=typo3)
 - the [GitHub security advisories](https://github.com/TYPO3/typo3/security/advisories)
+  of TYPO3 and html-sanitizer
+- the TYPO3 security bulletins (`TYPO3-CORE-SA-…`)
 - the TYPO3 git history (`[SECURITY]` commits and their
   `Security-References`)
+- `composer audit` and `npm audit` for bundled and required libraries
+
+The [OpenCVE list](https://app.opencve.io/cve/?vendor=typo3&product=typo3)
+is used as an additional manual source.
 
 A release is only made when every advisory is either fixed or documented
 as not affecting 12.4, with a reason. The complete process, including the

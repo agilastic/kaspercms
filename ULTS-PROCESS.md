@@ -12,8 +12,9 @@ See the [trademark notice](README.md#trademark-notice) in the README.
 
 KasperCMS 12.4 receives:
 
-- **Security fixes:** all public TYPO3 core security fixes that affect 12.4
+- **Security fixes:** public TYPO3 core security fixes that affect 12.4
   (steps 1–8 below), including follow-up fixes for regressions caused by them.
+  Each release documents them in its coverage matrix.
 - **Bug fixes:** upstream bug fixes from the `13.4` and 14.x branches that can be
   backported to 12.4 without risk (see [Bug fix backports](#bug-fix-backports)).
 - **Dependency updates:** security updates and patch-level updates of bundled
@@ -21,7 +22,10 @@ KasperCMS 12.4 receives:
   TYPO3 12.4.
 
 New features, breaking changes, database schema changes and upgrades to new
-major versions of dependencies are out of scope.
+major versions of dependencies are out of scope. Exception: a new major version
+is used when the security fix is only available there and TYPO3 made the same update in
+its maintained branches (`enshrined/svg-sanitize` `^1.0` in 12.4.45.1, which rejects SVG
+files with entity references).
 
 ## Overview (security fixes)
 
