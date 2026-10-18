@@ -23,3 +23,11 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+
+  # Third-party actions are pinned to commit SHAs; Dependabot reports
+  # security advisories for them (no version update pull requests).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
